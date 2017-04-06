@@ -1,0 +1,15 @@
+#!/bin/bash
+
+./bin/L1 $@
+if ! test -f prog.S ; then
+  exit ;
+fi
+
+as -o prog.o prog.S
+if ! test -f prog.o ; then
+  exit ;
+fi
+
+gcc -O2 -c -g -o runtime.o lib/runtime.c
+
+gcc -o a.out prog.o runtime.o
