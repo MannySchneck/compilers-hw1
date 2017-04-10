@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <stdint.h>
+#include <type_traits>
 
 namespace L1{
 
@@ -31,16 +32,22 @@ namespace L1{
                 alloc,
                 array_Error
         };
+////////////////////////////////////////////////////////////////////////////////
 
         class Translatable{
         public:
-                virtual void translate() = 0;
+                virtual void translate() const = 0;
                 virtual ~Translatable();
         };
 
         class Binop_Rhs{
         protected:
                 Binop_Rhs();
+        };
+
+        class Binop_Lhs{
+        protected:
+                Binop_Lhs();
         };
 
 
@@ -57,22 +64,31 @@ namespace L1{
 
         // t
         class Value_Source : public Source{
-        public:
-                void translate() override;
+        protected:
+                Value_Source() {};
         };
 
-        class Comparison : public Value_Source{
+        template<typename lhs_t, typename rhs_t>
+        class Comparison : public Translatable{
+                static_assert(std::is_base_of<Value_Source, lhs_t>::value &&
+                              std::is_base_of<Value_Source, rhs_t>::value,
+                              "Can't do a comparison unless it's on Value_Sources");
         public:
-                void translate() override;
+                Comparison(lhs_t lhs, rhs_t rhs) :
+                        lhs(lhs),
+                        rhs(rhs){};
+
+                void translate() const override;
         private:
-                Value_Source lhs;
-                Value_Source rhs;
+                lhs_t lhs;
+                rhs_t rhs;
         };
 
         // N
         class Integer_Literal :
                 public Value_Source
         {
+                void translate() const override;
                 int64_t value;
         };
 
@@ -88,6 +104,8 @@ namespace L1{
         {
         public:
                 Reg(std::string name);
+
+                void translate() const override;
         private:
                 std::string name;
         };
@@ -95,12 +113,13 @@ namespace L1{
         // w
         class Writable_Reg :
                 public Reg,
+                Binop_Lhs,
                 Writable,
                 Callable
         {};
 
         // a
-        class Argument_Reg : Reg
+        class Argument_Reg : public Reg
         {};
 
         // label
@@ -109,26 +128,15 @@ namespace L1{
                 Callable
         {
         public:
-                void translate() override;
+                void translate() const override;
         private:
                 std::string labelName;
-        };
-
-        class Memory_Ref :
-                public Binop_Rhs,
-                public Translatable
-        {
-        public:
-                void translate() override;
-        private:
-                Reg base;
-                int64_t offset;
         };
 
         // instructions
         class Instruction : public Translatable{
         public:
-                void translate() override;
+                void translate() const override;
         };
 
         class Binop : public Instruction
@@ -139,57 +147,75 @@ namespace L1{
                 Binop_Rhs rhs;
         };
 
+        class Memory_Ref :
+                public Binop_Rhs,
+                public Binop_Lhs,
+                public Translatable
+        {
+        public:
+                Memory_Ref(const Reg& base, int64_t offset) :
+                        base(base),
+                        offset(offset)
+                        {};
+                void translate() const override;
+        private:
+                Reg base;
+                int64_t offset;
+        };
+
         class Monop : public Instruction{
         public:
-                void translate() override;
+                void translate() const override;
         private:
-                Monop_Op op;
+                Monop_Op  op;
                 Writable_Reg target;
         };
 
         // jumps
         class L1_Goto : public Instruction{
         public:
-                void translate() override;
+                void translate() const override;
         private:
                 L1_Label target;
         };
 
+        template<typename lhs_t, typename rhs_t>
         class Cond_Jump : public Instruction{
         public:
-                void translate() override;
+                void translate() const override;
         private:
-                Value_Source lhs;
-                Value_Source rhs;
+                Comparison<lhs_t, rhs_t> cmp;
                 L1_Label true_target;
                 L1_Label false_target;
         };
 
         class Return : public Instruction{
         public:
-                void translate() override;
+                void translate() const override;
         };
 
         // calls
         class Runtime_Call : public Instruction{
         public:
-                void translate() override;
+                void translate() const override;
         private:
                 Runtime_Fun fun;
         };
 
+        template<typename callable_t>
         class Call : public Instruction{
+                static_assert(std::is_base_of<Callable, callable_t>::value, "not a callable type dude =(");
         public:
-                void translate() override;
+                void translate() const override;
         private:
-                Callable fun;
+                callable_t fun;
                 int64_t numargs;
         };
 
         // LEA (poor lonely child)
         class Load_Effective_Addr : public Instruction{
         public:
-                void translate() override;
+                void translate() const override;
         private:
                 Writable_Reg target;
                 Writable_Reg base;
@@ -202,7 +228,7 @@ namespace L1{
         public:
                 Function(Function&& rhs) = default;
 
-                void translate() override;
+                void translate() const override;
 
                 std::string name;
                 int64_t arguments;
@@ -215,10 +241,13 @@ namespace L1{
                 Program () = default;
                 Program(Program&& rhs) = default;
 
-                void translate() override;
+                void translate() const override;
 
                 std::string entryPointLabel;
                 std::vector<std::unique_ptr<L1::Function>> functions;
+
+        private:
+                std::fstream out_file;
         };
 
 
