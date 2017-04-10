@@ -6,38 +6,47 @@
 #include <fstream>
 #include <stdint.h>
 #include <type_traits>
+#include <exception>
+
+class NotImplementedException : public std::logic_error
+{
+public:
+        NotImplementedException() :
+                std::logic_error("Function not implemented. Moron.")
+                {};
+};
 
 namespace L1{
 
         enum class Binop_Op{
                 store,
                 // arithmetic ops
-                add_Assign,
-                sub_Assign,
-                mult_Assign,
-                bit_And_Assign,
+                        add_Assign,
+                        sub_Assign,
+                        mult_Assign,
+                        bit_And_Assign,
                 // Shift ops
-                right_Shift,
-                left_Shift
-        // comparators
-        };
+                        right_Shift,
+                        left_Shift
+                        // comparators
+                        };
 
         enum class Monop_Op{
                 inc,
-                dec
-        };
+                        dec
+                        };
 
         enum class Runtime_Fun{
                 print,
-                alloc,
-                array_Error
-        };
+                        alloc,
+                        array_Error
+                        };
 ////////////////////////////////////////////////////////////////////////////////
 
         class Translatable{
         public:
-                virtual void translate() const = 0;
-                virtual ~Translatable();
+                virtual void translate() const= 0;
+                virtual ~Translatable() {};
         };
 
         class Binop_Rhs{
@@ -62,29 +71,36 @@ namespace L1{
                 Callable() {};
         };
 
+        class Writable
+        {
+        protected:
+                Writable(){};
+        };
+
         // t
         class Value_Source : public Source{
         protected:
                 Value_Source() {};
         };
 
-        template<typename lhs_t, typename rhs_t>
         class Comparison : public Translatable{
-                static_assert(std::is_base_of<Value_Source, lhs_t>::value &&
-                              std::is_base_of<Value_Source, rhs_t>::value,
-                              "Can't do a comparison unless it's on Value_Sources");
         public:
-                Comparison(lhs_t lhs, rhs_t rhs) :
-                        lhs(lhs),
-                        rhs(rhs){};
+                Comparison(std::unique_ptr<Value_Source> lhs,
+                           std::unique_ptr<Value_Source> rhs)
+                        {
+                                this->lhs = std::move(lhs);
+                                this->rhs = std::move(rhs);
+                        };
 
-                void translate() const override;
+                void translate() const override {
+                        throw new NotImplementedException();
+                }
         private:
-                lhs_t lhs;
-                rhs_t rhs;
+                std::unique_ptr<Value_Source> lhs;
+                std::unique_ptr<Value_Source> rhs;
         };
 
-        // N
+// N
         class Integer_Literal :
                 public Value_Source
         {
@@ -92,13 +108,7 @@ namespace L1{
                 int64_t value;
         };
 
-        class Writable
-        {
-        protected:
-                Writable(){};
-        };
-
-        // x
+// x
         class Reg :
                 public Value_Source
         {
@@ -110,7 +120,7 @@ namespace L1{
                 std::string name;
         };
 
-        // w
+// w
         class Writable_Reg :
                 public Reg,
                 Binop_Lhs,
@@ -118,11 +128,11 @@ namespace L1{
                 Callable
         {};
 
-        // a
+// a
         class Argument_Reg : public Reg
         {};
 
-        // label
+// label
         class L1_Label :
                 public Source,
                 Callable
@@ -133,7 +143,7 @@ namespace L1{
                 std::string labelName;
         };
 
-        // instructions
+// instructions
         class Instruction : public Translatable{
         public:
                 void translate() const override;
@@ -141,19 +151,25 @@ namespace L1{
 
         class Binop : public Instruction
         {
-        private:
-                Writable lhs;
+        public:
+                Binop(Binop_Op op, std::unique_ptr<Writable> lhs, std::unique_ptr<Binop_Rhs> rhs)
+                        : lhs(std::move(lhs)),
+                          op(op),
+                          rhs(std::move(rhs))
+                        {}
+                private:
+                std::unique_ptr<Writable> lhs;
                 Binop_Op op;
-                Binop_Rhs rhs;
+                std::unique_ptr<Binop_Rhs> rhs;
         };
 
         class Memory_Ref :
-                public Binop_Rhs,
-                public Binop_Lhs,
+                Binop_Rhs,
+                Binop_Lhs,
                 public Translatable
         {
         public:
-                Memory_Ref(const Reg& base, int64_t offset) :
+                Memory_Ref(Reg base, int64_t offset) :
                         base(base),
                         offset(offset)
                         {};
@@ -171,7 +187,7 @@ namespace L1{
                 Writable_Reg target;
         };
 
-        // jumps
+// jumps
         class L1_Goto : public Instruction{
         public:
                 void translate() const override;
@@ -179,12 +195,11 @@ namespace L1{
                 L1_Label target;
         };
 
-        template<typename lhs_t, typename rhs_t>
         class Cond_Jump : public Instruction{
         public:
                 void translate() const override;
         private:
-                Comparison<lhs_t, rhs_t> cmp;
+                Comparison cmp;
                 L1_Label true_target;
                 L1_Label false_target;
         };
@@ -194,7 +209,7 @@ namespace L1{
                 void translate() const override;
         };
 
-        // calls
+// calls
         class Runtime_Call : public Instruction{
         public:
                 void translate() const override;
@@ -202,17 +217,19 @@ namespace L1{
                 Runtime_Fun fun;
         };
 
-        template<typename callable_t>
         class Call : public Instruction{
-                static_assert(std::is_base_of<Callable, callable_t>::value, "not a callable type dude =(");
         public:
+                Call(std::unique_ptr<Callable> fun){
+                        this->fun = std::move(fun);
+                }
+
                 void translate() const override;
         private:
-                callable_t fun;
+                std::unique_ptr<Callable> fun;
                 int64_t numargs;
         };
 
-        // LEA (poor lonely child)
+// LEA (poor lonely child)
         class Load_Effective_Addr : public Instruction{
         public:
                 void translate() const override;
@@ -223,7 +240,7 @@ namespace L1{
                 int64_t mult; // 0 | 2 | 4 | 8
         };
 
-        // function
+// function
         class Function : public Translatable{
         public:
                 Function(Function&& rhs) = default;
@@ -233,15 +250,19 @@ namespace L1{
                 std::string name;
                 int64_t arguments;
                 int64_t locals;
+                std::vector<std::unique_ptr<Instruction>> instructions;
         };
 
-        // entry point (program)
+// entry point (program)
         class Program : public Translatable{
         public:
                 Program () = default;
                 Program(Program&& rhs) = default;
+                ~Program() override = default;
 
-                void translate() const override;
+                void translate() const override {
+                        throw new NotImplementedException();
+                }
 
                 std::string entryPointLabel;
                 std::vector<std::unique_ptr<L1::Function>> functions;
