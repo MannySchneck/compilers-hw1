@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <iostream>
 #include <fstream>
 #include <stdint.h>
 #include <type_traits>
@@ -45,7 +46,7 @@ namespace L1{
 
         class Translatable{
         public:
-                virtual void translate() const= 0;
+                virtual void translate(std::ostream) const= 0;
                 virtual ~Translatable() {};
         };
 
@@ -92,7 +93,7 @@ namespace L1{
                                 this->rhs = std::move(rhs);
                         };
 
-                void translate() const override {
+                void translate(std::ostream) const override {
                         throw new NotImplementedException();
                 }
         private:
@@ -104,7 +105,7 @@ namespace L1{
         class Integer_Literal :
                 public Value_Source
         {
-                void translate() const override;
+                void translate(std::ostream) const override;
                 int64_t value;
         };
 
@@ -115,7 +116,7 @@ namespace L1{
         public:
                 Reg(std::string name);
 
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 std::string name;
         };
@@ -138,7 +139,7 @@ namespace L1{
                 Callable
         {
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 std::string labelName;
         };
@@ -146,7 +147,7 @@ namespace L1{
 // instructions
         class Instruction : public Translatable{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         };
 
         class Binop : public Instruction
@@ -173,7 +174,7 @@ namespace L1{
                         base(base),
                         offset(offset)
                         {};
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 Reg base;
                 int64_t offset;
@@ -181,7 +182,7 @@ namespace L1{
 
         class Monop : public Instruction{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 Monop_Op  op;
                 Writable_Reg target;
@@ -190,14 +191,14 @@ namespace L1{
 // jumps
         class L1_Goto : public Instruction{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 L1_Label target;
         };
 
         class Cond_Jump : public Instruction{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 Comparison cmp;
                 L1_Label true_target;
@@ -206,13 +207,13 @@ namespace L1{
 
         class Return : public Instruction{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         };
 
 // calls
         class Runtime_Call : public Instruction{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 Runtime_Fun fun;
         };
@@ -223,7 +224,7 @@ namespace L1{
                         this->fun = std::move(fun);
                 }
 
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 std::unique_ptr<Callable> fun;
                 int64_t numargs;
@@ -232,7 +233,7 @@ namespace L1{
 // LEA (poor lonely child)
         class Load_Effective_Addr : public Instruction{
         public:
-                void translate() const override;
+                void translate(std::ostream) const override;
         private:
                 Writable_Reg target;
                 Writable_Reg base;
@@ -243,9 +244,10 @@ namespace L1{
 // function
         class Function : public Translatable{
         public:
+                Function() = default;
                 Function(Function&& rhs) = default;
 
-                void translate() const override;
+                void translate(std::ostream outfile) const override;
 
                 std::string name;
                 int64_t arguments;
@@ -257,21 +259,18 @@ namespace L1{
         class Program : public Translatable{
         public:
                 Program () = default;
+
                 Program(Program&& rhs) = default;
                 ~Program() override = default;
 
-                void translate() const override {
-                        throw new NotImplementedException();
-                }
+                void translate(std::ostream) const override;
 
                 std::string entryPointLabel;
                 std::vector<std::unique_ptr<L1::Function>> functions;
 
         private:
-                std::fstream out_file;
         };
 
 
         Program L1_parse_file (Program &p,char *fileName);
-
 } // L1

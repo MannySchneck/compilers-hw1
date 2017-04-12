@@ -10,14 +10,13 @@
 #include <cstdlib>
 #include <stdint.h>
 #include <unistd.h>
-#include <iostream>
-
+#include <fstream>
 #include <parser.h>
 
 using namespace std;
 
 int main(
-  int argc, 
+  int argc,
   char **argv
   ){
   bool verbose;
@@ -43,11 +42,14 @@ int main(
 
   /* Parse the L1 program.
    */
-  L1::Program p = L1::L1_parse_file(argv[optind]);
+  L1::Program p(std::move(L1::L1_parse_file(argv[optind])));
+
+  /* program preamble
+   */
 
   /* Generate x86_64 code
    */
-  for (auto f : p.functions){
+  for (auto& f : p.functions){
     cout << f->name << " has " << f->arguments << " parameters and " << f->locals << " local variables" << endl;
   }
 
