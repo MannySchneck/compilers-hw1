@@ -1,5 +1,5 @@
 #include <array>
-const char* prog_prefix = ".text\n.globl go\n";
+const char* prog_prefix = ".text\n.globl go\n\n";
 
 const std::array<char*, 6>& callee_saves(){
         static const std::array<char*, 6> callee_saves_table = {"rbx",

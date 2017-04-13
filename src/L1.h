@@ -46,25 +46,25 @@ namespace L1{
 
         class Translatable{
         public:
-                virtual void translate(std::ostream) const= 0;
+                virtual void translate(std::ostream&) const= 0;
                 virtual ~Translatable() {};
         };
 
-        class Binop_Rhs{
+        class Binop_Rhs : public virtual Translatable{
         protected:
-                Binop_Rhs();
+                Binop_Rhs() = default;
         };
 
         class Binop_Lhs{
         protected:
-                Binop_Lhs();
+                Binop_Lhs() = default;
         };
 
 
         // s
         class Source :
                 public Binop_Rhs,
-                public Translatable{
+                public virtual Translatable{
         };
 
         class Callable{
@@ -72,7 +72,8 @@ namespace L1{
                 Callable() {};
         };
 
-        class Writable
+        class Writable :
+                public virtual Translatable
         {
         protected:
                 Writable(){};
@@ -84,7 +85,7 @@ namespace L1{
                 Value_Source() {};
         };
 
-        class Comparison : public Translatable{
+        class Comparison : public virtual Translatable{
         public:
                 Comparison(std::unique_ptr<Value_Source> lhs,
                            std::unique_ptr<Value_Source> rhs)
@@ -93,7 +94,7 @@ namespace L1{
                                 this->rhs = std::move(rhs);
                         };
 
-                void translate(std::ostream) const override {
+                void translate(std::ostream&) const override {
                         throw new NotImplementedException();
                 }
         private:
@@ -105,7 +106,9 @@ namespace L1{
         class Integer_Literal :
                 public Value_Source
         {
-                void translate(std::ostream) const override;
+        public:
+                Integer_Literal(std::string);
+                void translate(std::ostream&) const override;
                 int64_t value;
         };
 
@@ -116,7 +119,7 @@ namespace L1{
         public:
                 Reg(std::string name);
 
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 std::string name;
         };
@@ -125,9 +128,13 @@ namespace L1{
         class Writable_Reg :
                 public Reg,
                 Binop_Lhs,
-                Writable,
+                public Writable,
                 Callable
-        {};
+        {
+        public:
+                Writable_Reg(std::string);
+                void translate(std::ostream&) const override;
+        };
 
 // a
         class Argument_Reg : public Reg
@@ -139,26 +146,27 @@ namespace L1{
                 Callable
         {
         public:
-                void translate(std::ostream) const override;
+                L1_Label();
+                L1_Label(std::string label);
+
+                void translate(std::ostream&) const override;
         private:
                 std::string labelName;
         };
 
 // instructions
-        class Instruction : public Translatable{
+        class Instruction : public virtual Translatable{
         public:
-                void translate(std::ostream) const override;
+                //void translate(std::ostream&) const override;
         };
 
         class Binop : public Instruction
         {
         public:
-                Binop(Binop_Op op, std::unique_ptr<Writable> lhs, std::unique_ptr<Binop_Rhs> rhs)
-                        : lhs(std::move(lhs)),
-                          op(op),
-                          rhs(std::move(rhs))
-                        {}
-                private:
+                Binop(Binop_Op op, std::unique_ptr<Writable> lhs, std::unique_ptr<Binop_Rhs> rhs);
+                void translate(std::ostream&) const override;
+
+        private:
                 std::unique_ptr<Writable> lhs;
                 Binop_Op op;
                 std::unique_ptr<Binop_Rhs> rhs;
@@ -167,14 +175,14 @@ namespace L1{
         class Memory_Ref :
                 Binop_Rhs,
                 Binop_Lhs,
-                public Translatable
+                public virtual Translatable
         {
         public:
                 Memory_Ref(Reg base, int64_t offset) :
                         base(base),
                         offset(offset)
                         {};
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 Reg base;
                 int64_t offset;
@@ -182,7 +190,7 @@ namespace L1{
 
         class Monop : public Instruction{
         public:
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 Monop_Op  op;
                 Writable_Reg target;
@@ -191,14 +199,14 @@ namespace L1{
 // jumps
         class L1_Goto : public Instruction{
         public:
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 L1_Label target;
         };
 
         class Cond_Jump : public Instruction{
         public:
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 Comparison cmp;
                 L1_Label true_target;
@@ -207,13 +215,13 @@ namespace L1{
 
         class Return : public Instruction{
         public:
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         };
 
 // calls
         class Runtime_Call : public Instruction{
         public:
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 Runtime_Fun fun;
         };
@@ -224,7 +232,7 @@ namespace L1{
                         this->fun = std::move(fun);
                 }
 
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 std::unique_ptr<Callable> fun;
                 int64_t numargs;
@@ -233,7 +241,7 @@ namespace L1{
 // LEA (poor lonely child)
         class Load_Effective_Addr : public Instruction{
         public:
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
         private:
                 Writable_Reg target;
                 Writable_Reg base;
@@ -242,35 +250,40 @@ namespace L1{
         };
 
 // function
-        class Function : public Translatable{
+        class Function : public virtual Translatable{
         public:
                 Function() = default;
+                Function(L1_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
 
-                void translate(std::ostream outfile) const override;
+                void translate(std::ostream& outfile) const override;
+                int64_t stack_args() const;
 
-                std::string name;
+                L1_Label name;
                 int64_t arguments;
                 int64_t locals;
                 std::vector<std::unique_ptr<Instruction>> instructions;
         };
 
 // entry point (program)
-        class Program : public Translatable{
+        class Program : public virtual Translatable{
         public:
                 Program () = default;
 
                 Program(Program&& rhs) = default;
+
+                Program(std::string label);
+
                 ~Program() override = default;
 
-                void translate(std::ostream) const override;
+                void translate(std::ostream&) const override;
 
-                std::string entryPointLabel;
+                L1_Label entryPointLabel;
                 std::vector<std::unique_ptr<L1::Function>> functions;
 
         private:
         };
 
 
-        Program L1_parse_file (Program &p,char *fileName);
+        Program L1_parse_file (char *fileName);
 } // L1

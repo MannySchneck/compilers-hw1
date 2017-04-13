@@ -269,9 +269,7 @@ namespace L1 {
 
         template<> struct action < label > {
                 static void apply( const pegtl::input & in, L1::Program & p){
-                        if (p.entryPointLabel.empty()){
-                                p.entryPointLabel = in.string();
-                        }
+                        ;
                 }
         };
 
