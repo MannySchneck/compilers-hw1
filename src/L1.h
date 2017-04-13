@@ -55,7 +55,7 @@ namespace L1{
                 Binop_Rhs() = default;
         };
 
-        class Binop_Lhs{
+        class Binop_Lhs : public virtual Translatable{
         protected:
                 Binop_Lhs() = default;
         };
@@ -73,7 +73,8 @@ namespace L1{
         };
 
         class Writable :
-                public virtual Translatable
+                public virtual Translatable,
+                public Binop_Lhs
         {
         protected:
                 Writable(){};
@@ -88,8 +89,7 @@ namespace L1{
         class Comparison : public virtual Translatable{
         public:
                 Comparison(std::unique_ptr<Value_Source> lhs,
-                           std::unique_ptr<Value_Source> rhs)
-                        {
+                           std::unique_ptr<Value_Source> rhs){
                                 this->lhs = std::move(lhs);
                                 this->rhs = std::move(rhs);
                         };
@@ -127,7 +127,6 @@ namespace L1{
 // w
         class Writable_Reg :
                 public Reg,
-                Binop_Lhs,
                 public Writable,
                 Callable
         {
@@ -163,17 +162,17 @@ namespace L1{
         class Binop : public Instruction
         {
         public:
-                Binop(Binop_Op op, std::unique_ptr<Writable> lhs, std::unique_ptr<Binop_Rhs> rhs);
+                Binop(Binop_Op op, std::unique_ptr<Binop_Lhs> lhs, std::unique_ptr<Binop_Rhs> rhs);
                 void translate(std::ostream&) const override;
 
         private:
-                std::unique_ptr<Writable> lhs;
+                std::unique_ptr<Binop_Lhs> lhs;
                 Binop_Op op;
                 std::unique_ptr<Binop_Rhs> rhs;
         };
 
         class Memory_Ref :
-                Binop_Rhs,
+                public Binop_Rhs,
                 Binop_Lhs,
                 public virtual Translatable
         {

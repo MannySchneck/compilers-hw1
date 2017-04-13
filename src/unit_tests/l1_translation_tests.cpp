@@ -31,7 +31,7 @@ TEST_CASE("Store instruction"){
         }
 
         SECTION("Immediate to Reg"){
-                std::unique_ptr<Writable> rdi(new Writable_Reg("rdi"));
+                std::unique_ptr<Binop_Lhs> rdi(new Writable_Reg("rdi"));
                 std::unique_ptr<Binop_Rhs> i(new Integer_Literal("22"));
 
                 Binop b(Binop_Op::store, std::move(rdi), std::move(i));
@@ -39,6 +39,11 @@ TEST_CASE("Store instruction"){
                 b.translate(ss);
 
                 REQUIRE(ss.str() == "movq $22, %rdi");
+        }
+
+        SECTION("Memory to Reg"){
+                Reg reg("rdi");
+                std::unique_ptr<Binop_Rhs> rdi(new Memory_Ref(reg, 0));
         }
 }
 

@@ -37,7 +37,12 @@ void Reg::translate(std::ostream& out) const{
         out << "%" << name;
 }
 
-Binop::Binop(Binop_Op op, std::unique_ptr<Writable> lhs, std::unique_ptr<Binop_Rhs> rhs):
+
+void Memory_Ref::translate(std::ostream& out) const{
+        out << "ack!";
+}
+
+Binop::Binop(Binop_Op op, std::unique_ptr<Binop_Lhs> lhs, std::unique_ptr<Binop_Rhs> rhs):
         lhs(std::move(lhs)),
         op(op),
         rhs(std::move(rhs)) {}
