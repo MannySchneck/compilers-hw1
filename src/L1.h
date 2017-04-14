@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <type_traits>
 #include <exception>
+#include <unordered_map>
 
 class NotImplementedException : public std::logic_error
 {
@@ -18,7 +19,6 @@ public:
 };
 
 namespace L1{
-
         enum class Binop_Op{
                 store,
                 // arithmetic ops
@@ -26,10 +26,18 @@ namespace L1{
                         sub_Assign,
                         mult_Assign,
                         bit_And_Assign,
+                        };
+
+        enum class Shop_Op{
                 // Shift ops
-                        right_Shift,
+                right_Shift,
                         left_Shift
-                        // comparators
+                        };
+
+        enum class Cmp_Op{
+                equal,
+                        less,
+                        less_Equal,
                         };
 
         enum class Monop_Op{
@@ -86,21 +94,6 @@ namespace L1{
                 Value_Source() {};
         };
 
-        class Comparison : public virtual Translatable{
-        public:
-                Comparison(std::unique_ptr<Value_Source> lhs,
-                           std::unique_ptr<Value_Source> rhs){
-                                this->lhs = std::move(lhs);
-                                this->rhs = std::move(rhs);
-                        };
-
-                void translate(std::ostream&) const override {
-                        throw new NotImplementedException();
-                }
-        private:
-                std::unique_ptr<Value_Source> lhs;
-                std::unique_ptr<Value_Source> rhs;
-        };
 
 // N
         class Integer_Literal :
@@ -119,9 +112,13 @@ namespace L1{
         public:
                 Reg(std::string name);
 
+                Reg get_eight_bit() const;
+
                 void translate(std::ostream&) const override;
         private:
                 std::string name;
+                static const std::unordered_map<std::string, std::string> eight_bit_name;
+
         };
 
 // w
@@ -134,6 +131,23 @@ namespace L1{
                 Writable_Reg(std::string);
                 void translate(std::ostream&) const override;
         };
+
+        class Comparison_Store : public virtual Translatable
+        {
+        public:
+                Comparison_Store(Cmp_Op op,
+                                 std::unique_ptr<Value_Source> lhs,
+                                 std::unique_ptr<Value_Source> rhs,
+                                 Writable_Reg target);
+
+                void translate(std::ostream&) const override;
+        private:
+                Cmp_Op op;
+                Writable_Reg target;
+                std::unique_ptr<Value_Source> lhs;
+                std::unique_ptr<Value_Source> rhs;
+        };
+
 
 // a
         class Argument_Reg : public Reg
@@ -159,6 +173,17 @@ namespace L1{
                 //void translate(std::ostream&) const override;
         };
 
+        class Shop : public Instruction
+        {
+        public:
+                Shop(Shop_Op, std::unique_ptr<Writable_Reg>, std::unique_ptr<Value_Source>);
+                void translate(std::ostream&) const override;
+        private:
+                Shop_Op op;
+                std::unique_ptr<Writable_Reg> lhs;
+                std::unique_ptr<Value_Source> rhs;
+        };
+
         class Binop : public Instruction
         {
         public:
@@ -173,9 +198,8 @@ namespace L1{
 
         class Memory_Ref :
                 public Binop_Rhs,
-                Binop_Lhs,
-                public virtual Translatable
-        {
+                public Binop_Lhs,
+                public virtual Translatable {
         public:
                 Memory_Ref(Reg base, int64_t offset) :
                         base(base),
@@ -207,7 +231,9 @@ namespace L1{
         public:
                 void translate(std::ostream&) const override;
         private:
-                Comparison cmp;
+                Cmp_Op cmp;
+                std::unique_ptr<Value_Source> Cmp_Lhs;
+                std::unique_ptr<Value_Source> Cmp_Rhs;
                 L1_Label true_target;
                 L1_Label false_target;
         };
