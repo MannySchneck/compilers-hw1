@@ -42,7 +42,7 @@ int main(
 
         /* Parse the L1 program.
          */
-        L1::Program p(L1::L1_parse_file(argv[optind]));
+        L1::Program p(L1::L1_parse_file(std::string(argv[optind])));
 
 
         /* Generate x86_64 code

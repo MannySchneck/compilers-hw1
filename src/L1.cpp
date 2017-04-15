@@ -6,7 +6,8 @@
 
 using namespace L1;
 
-L1::L1_Label::L1_Label() = default;
+L1_Label::L1_Label() {};
+
 L1::L1_Label::L1_Label(std::string label) :
         labelName(label){};
 
@@ -62,10 +63,41 @@ void Reg::translate(std::ostream& out) const{
 }
 
 
+Memory_Ref::Memory_Ref(Reg base, int64_t offset) :
+        base(base),
+        offset(offset)
+{
+        if(offset % 8 != 0){
+                throw std::invalid_argument("memory ref must be multiple of 8");
+        }
+};
+
 void Memory_Ref::translate(std::ostream& out) const{
         out << offset << "(";
         base.translate(out);
         out << ")";
+}
+
+
+LEA::LEA(Writable_Reg target, Writable_Reg base, Writable_Reg offset, int64_t mult) :
+        target(target),
+        base(base),
+        offset(offset),
+        mult(mult)
+{
+        if((mult % 2) || mult > 8){
+                throw std::invalid_argument("mult must be even, and 8 or less");
+        }
+}
+
+void LEA::translate(std::ostream& out) const{
+        out << "lea (";
+        base.translate(out);
+        out << ", ";
+        offset.translate(out);
+        out << ", " << mult;
+        out << "), ";
+        target.translate(out);
 }
 
 Comparison_Store::Comparison_Store(Cmp_Op op,
@@ -111,21 +143,158 @@ void output_mov(Writable_Reg target, int val, std::ostream& out){
         target.translate(out);
 }
 
+Cond_Jump::Cond_Jump(Cmp_Op cmp,
+                     std::unique_ptr<Value_Source> Cmp_Lhs,
+                     std::unique_ptr<Value_Source> Cmp_Rhs,
+                     L1_Label true_target,
+                     L1_Label false_target) :
+        cmp(cmp),
+        Cmp_Lhs(std::move(Cmp_Lhs)),
+        Cmp_Rhs(std::move(Cmp_Rhs)),
+        true_target(true_target),
+        false_target(false_target){}
+
+void output_const_cjump(int result, const L1_Label& t_target, const L1_Label& f_target, std::ostream& out){
+        if(result){
+                out << "jmp ";
+                t_target.translate(out);
+        } else{
+                out << "jmp ";
+                f_target.translate(out);
+        }
+}
+
+void gen_cjump_text(Translatable* lhs,
+                    Translatable* rhs,
+                    L1_Label t_t,
+                    L1_Label f_t,
+                    std::string jmp,
+                    std::ostream& out){
+        output_comparison(lhs, rhs, out);
+        out << "\n\t" << jmp << " ";
+        t_t.translate(out);
+        out << "\n\t" << "jmp ";
+        f_t.translate(out);
+}
+
+void Cond_Jump::translate(std::ostream& out) const{
+        int result;
+        Cmp_Case arg_case;
+        Integer_Literal* ilhs;
+        Integer_Literal* irhs;
+
+        if((ilhs = dynamic_cast<Integer_Literal*>(Cmp_Lhs.get())) &&
+           (irhs = dynamic_cast<Integer_Literal*>(Cmp_Rhs.get()))){
+                arg_case = Cmp_Case::both_Int;
+        }
+        // need to flip
+        else if(dynamic_cast<Integer_Literal*>(Cmp_Lhs.get())
+                && dynamic_cast<Reg*>(Cmp_Rhs.get())){
+                arg_case = Cmp_Case::flip;
+        }
+
+        switch(cmp){
+        case (Cmp_Op::equal):
+                switch(arg_case){
+                case (Cmp_Case::both_Int):
+                        result = ilhs->value == irhs->value;
+                        output_const_cjump(result, true_target, false_target, out);
+                        break;
+                case(Cmp_Case::flip):
+                        gen_cjump_text(Cmp_Rhs.get(),
+                                       Cmp_Lhs.get(),
+                                       true_target,
+                                       false_target,
+                                       "je",
+                                       out);
+                        break;
+                default:
+                        gen_cjump_text(Cmp_Lhs.get(),
+                                       Cmp_Rhs.get(),
+                                       true_target,
+                                       false_target,
+                                       "je",
+                                       out);
+                        break;
+                }
+                break;
+        case (Cmp_Op::less):
+                switch(arg_case){
+                case (Cmp_Case::both_Int):
+                        result = ilhs->value < irhs->value;
+                        output_const_cjump(result, true_target, false_target, out);
+                        break;
+                case(Cmp_Case::flip):
+                        gen_cjump_text(Cmp_Rhs.get(),
+                                       Cmp_Lhs.get(),
+                                       true_target,
+                                       false_target,
+                                       "jg",
+                                       out);
+                        break;
+                default:
+                        gen_cjump_text(Cmp_Lhs.get(),
+                                       Cmp_Rhs.get(),
+                                       true_target,
+                                       false_target,
+                                       "jl",
+                                       out);
+                        break;
+                }
+
+                break;
+        case (Cmp_Op::less_Equal):
+                switch(arg_case){
+                case (Cmp_Case::both_Int):
+                        result = ilhs->value <= irhs->value;
+                        output_const_cjump(result, true_target, false_target, out);
+                        break;
+                case(Cmp_Case::flip):
+                        gen_cjump_text(Cmp_Rhs.get(),
+                                       Cmp_Lhs.get(),
+                                       true_target,
+                                       false_target,
+                                       "jge",
+                                       out);
+                        break;
+                default:
+                        gen_cjump_text(Cmp_Lhs.get(),
+                                       Cmp_Rhs.get(),
+                                       true_target,
+                                       false_target,
+                                       "jle",
+                                       out);
+                        break;
+                }
+                break;
+        default:
+                throw std::logic_error("Fuck you");
+        }
+
+}
+
+Goto::Goto(std::string lab) :
+        target(lab){};
+
+void Goto::translate(std::ostream& out) const{
+        out << "jmp ";
+        target.translate(out);
+}
+
+
 void Comparison_Store::translate(std::ostream& out) const{
         int result;
         Cmp_Case arg_case;
         Integer_Literal* ilhs;
         Integer_Literal* irhs;
-        Reg* rlhs;
-        Reg* rrhs;
 
         if((ilhs = dynamic_cast<Integer_Literal*>(lhs.get())) &&
            (irhs = dynamic_cast<Integer_Literal*>(rhs.get()))){
                 arg_case = Cmp_Case::both_Int;
         }
         // need to flip
-        else if((ilhs = dynamic_cast<Integer_Literal*>(lhs.get()))
-                && (rrhs = dynamic_cast<Reg*>(rhs.get()))){
+        else if(dynamic_cast<Integer_Literal*>(lhs.get())
+                && dynamic_cast<Reg*>(rhs.get())){
                 arg_case = Cmp_Case::flip;
         }
 
@@ -175,7 +344,24 @@ void Comparison_Store::translate(std::ostream& out) const{
                 }
                 break;
         default:
-                throw new std::logic_error("Fuck you");
+                throw std::logic_error("Fuck you");
+        }
+}
+
+Monop::Monop(Monop_Op op, Writable_Reg target) :
+        op(op),
+        target(target){};
+
+void Monop::translate(std::ostream& out) const{
+        switch(op){
+        case (Monop_Op::inc):
+                out << "inc ";
+                target.translate(out);
+                break;
+        case (Monop_Op::dec):
+                out << "dec";
+                target.translate(out);
+                break;
         }
 }
 
@@ -202,7 +388,7 @@ void Binop::translate(std::ostream& out) const{
                 out << "andq ";
                 break;
         default:
-                throw new std::logic_error("Can't happen");
+                throw std::logic_error("Can't happen");
         }
         rhs->translate(out);
         out << ", ";
@@ -223,7 +409,7 @@ void Shop::translate(std::ostream& out) const{
                 out << "sarq ";
                 break;
         default:
-                throw new std::logic_error("Can't happen");
+                throw std::logic_error("Can't happen");
 
         }
 
@@ -239,6 +425,42 @@ void Shop::translate(std::ostream& out) const{
         out << ", ";
         lhs->translate(out);
 }
+
+Call::Call(std::unique_ptr<Callable> fun, int64_t numargs) :
+        fun(std::move(fun)),
+        numargs(numargs){}
+
+void Call::translate(std::ostream& out) const{
+        out << "subq $8, %rsp";
+        out << "\n\tjmp ";
+
+        if(dynamic_cast<Writable_Reg*>(fun.get())){
+                out << "*";
+                fun->translate(out);
+        } else {
+                fun->translate(out);
+        }
+}
+
+Runtime_Call::Runtime_Call(Runtime_Fun fun) :
+        fun(fun){}
+
+void Runtime_Call::translate(std::ostream& out) const{
+        out << "call ";
+        switch(fun){
+        case (Runtime_Fun::print):
+                out << "print";
+                break;
+        case (Runtime_Fun::alloc):
+                out << "alloc";
+                break;
+        case (Runtime_Fun::array_Error):
+                out << "array_Error";
+                break;
+
+        }
+}
+
 
 Function::Function(L1_Label name, int64_t args, int64_t locals) :
         name(name),
@@ -260,7 +482,6 @@ void Function::translate(std::ostream &out) const{
 
         out << "addq $" << 8 * (locals  + stack_args()) << ", %rsp";
         out << "\n\t" << "retq";
-
 }
 
 L1::Program::Program(std::string label) :
@@ -283,4 +504,9 @@ void L1::Program::translate(std::ostream &out) const {
         }
 
         out << "\tretq";
+
+        for(auto& fun : functions){
+                out << "\n";
+                fun->translate(out);
+        }
 }

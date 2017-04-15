@@ -11,14 +11,20 @@
 #include <assert.h>
 #include <memory>
 #include <deque>
+#include <sstream>
 
 #include <L1.h>
+#include "parser.h"
 #include <pegtl.hh>
 #include <pegtl/analyze.hh>
 #include <pegtl/contrib/raw_string.hh>
 
 
 namespace L1 {
+
+        template<typename T>
+        using uptr = std::unique_ptr<T>;
+
 
         /*
          * Grammar rules from now on.
@@ -40,6 +46,9 @@ namespace L1 {
                                 >
                         >
                 > {};
+
+        struct entry_point_label:
+                label{};
 
         struct function_name:
                 label {};
@@ -106,15 +115,17 @@ namespace L1 {
         {};
 
         struct reg :
-                pegtl::sor <
-                writable_reg,
                 pegtl::string<'r','s','p'>
-                >{};
+        {};
+
+        struct immediate:
+                number{};
 
         struct source :
                 pegtl::sor <
+                writable_reg,
                 reg,
-                number,
+                immediate,
                 label
                 >{};
 
@@ -125,11 +136,17 @@ namespace L1 {
                 pegtl::seq<
                 pegtl::one<'('>,
                 seps,
-                pegtl::string<'m','e','m'>,
-                seps,
-                reg,
-                mem_offset,
-                pegtl::one<')'>
+                pegtl::if_must<
+                        pegtl::string<'m','e','m'>,
+                        seps,
+                        pegtl::sor<
+                                reg,
+                                writable_reg
+                                >,
+                        seps,
+                        mem_offset,
+                        pegtl::one<')'>
+                        >
                 >{};
 
         struct Left_arrow :
@@ -137,33 +154,88 @@ namespace L1 {
         {};
 
         struct L1_basic_store :
-                pegtl::sor<
                 pegtl::seq<
+                pegtl::sor<L1_mem_ref,
+                           writable_reg
+                           >,
+                seps,
+                Left_arrow,
+                seps,
+                pegtl::sor<
+                        source,
+                        L1_mem_ref
+                        >
+                >
+        // seq<
+        //         writable_reg,
+        //         seps,
+        //         left_arrow,
+        //         L1_mem_ref
+        //         >,
+        // seq<
+        //         mem_ref,
+        //         seps,
+        //         left_arrow,
+        //         source
+        //         >
+        {};
 
-                        writable_reg,
-                        seps,
-                        Left_arrow,
-                        seps,
+        struct add:
+                pegtl::string<'+','='>{};
+        struct sub:
+                pegtl::string<'-','='>{};
+        struct mult:
+                pegtl::string<'*','='>{};
+        struct band:
+                pegtl::string<'&','='>{};
+
+        struct L1_aop :
+                pegtl::seq<
+                writable_reg,
+                seps,
+                pegtl::sor<
+                        add,
+                        sub,
+                        mult,
+                        band
+                        >,
+                seps,
+                pegtl::sor<
                         source
                         >
-                // seq<
-                //         writable_reg,
-                //         seps,
-                //         left_arrow,
-                //         L1_mem_ref
-                //         >,
-                // seq<
-                //         mem_ref,
-                //         seps,
-                //         left_arrow,
-                //         source
-                //         >
                 >{};
+
+        struct rcx :
+                pegtl::string<'r', 'c','x'>{};
+
+        struct left_shift:
+                pegtl::string<'<','<','='>{};
+
+        struct right_shift:
+                pegtl::string<'>','>','='>{};
+
+
+        struct L1_sop :
+                pegtl::seq<
+                writable_reg,
+                seps,
+                pegtl::sor<
+                        left_shift,
+                        right_shift
+                        >,
+                seps,
+                pegtl::sor<
+                        rcx,
+                        immediate
+                        >
+                >{};
+
 
         struct L1_instruction :
                 pegtl::sor<
-                L1_basic_store //,
-                // L1_binop,
+                L1_basic_store,
+                L1_aop,
+                L1_sop
                 // L1_cjump,
                 // L1_label,
                 // L1_goto,
@@ -221,7 +293,7 @@ namespace L1 {
                 seps,
                 pegtl::one< '(' >,
                 seps,
-                label,
+                entry_point_label,
                 seps,
                 L1_functions_rule,
                 seps,
@@ -234,32 +306,19 @@ namespace L1 {
                 entry_point_rule
                 > {};
 
-        /*
-         * Data structures required to parse
-         */
+        // Globals... Fuck you PEGTL. Fuck You. Fuckfuckfuckfuck.
+        L1_Parse_Stack the_stack;
 
-        using L1_item_ptr = std::unique_ptr<L1::Translatable>;
+        std::vector<Binop_Op> aop_stack;
+        std::vector<Shop_Op> shop_stack;
+        std::vector<Cmp_Op> cmp_stack;
+        std::vector<Monop_Op> monop_stack;
+        std::vector<Runtime_Fun> rf_stack;
 
-        class L1_Instruction_Elems_Stack {
-
-        public:
-                void push(L1_item_ptr item){
-                        instr_elements.push_back(std::move(item));
-                }
-
-                L1_item_ptr pop(){
-                        auto tmp = std::move(instr_elements.back());
-                        instr_elements.pop_back();
-                        return tmp;
-                }
-
-                const L1_item_ptr& peek() const{
-                        return instr_elements.back();
-                }
-
-        private:
-                std::deque<L1_item_ptr> instr_elements;
-        };
+        void push_instr_curf(Program &p, Instruction* i){
+                const auto& currentF = p.functions.back();
+                currentF->instructions.push_back(std::unique_ptr<Instruction>(i));
+        }
 
         /*
          * Actions attached to grammar rules.
@@ -267,14 +326,15 @@ namespace L1 {
         template< typename Rule >
         struct action : pegtl::nothing< Rule > {};
 
-        template<> struct action < label > {
-                static void apply( const pegtl::input & in, L1::Program & p){
-                        ;
+        template<> struct action <entry_point_label> {
+                static void apply(const pegtl::input &in, Program &p){
+                        p.entryPointLabel = in.string();
                 }
         };
 
+
         template<> struct action < function_name > {
-                static void apply( const pegtl::input & in, L1::Program & p){
+                static void apply(const pegtl::input &in, Program &p){
                         std::unique_ptr<L1::Function> newF(new L1::Function());
                         newF->name = in.string();
                         p.functions.push_back(std::move(newF));
@@ -283,30 +343,136 @@ namespace L1 {
 
 
         template<> struct action < argument_number > {
-                static void apply( const pegtl::input & in, L1::Program & p){
+                static void apply(const pegtl::input &in, Program &p){
                         const auto& currentF = p.functions.back();
                         currentF->arguments = std::stoll(in.string());
                 }
         };
 
         template<> struct action < local_number > {
-                static void apply( const pegtl::input & in, L1::Program & p){
+                static void apply(const pegtl::input &in, Program &p){
                         const auto& currentF = p.functions.back();
                         currentF->locals = std::stoll(in.string());
                 }
         };
 
-        template<> struct action <L1_basic_store> {
-                static void apply(const pegtl::input & in, L1::Program & p){
-                        L1_Instruction_Elems_Stack stack;
-                        std::unique_ptr<L1::Binop> store();
 
+///////////////////////////////////////////////////////////////////////////////
+//                                Instructions                               //
+///////////////////////////////////////////////////////////////////////////////
+        template<> struct action <L1_basic_store> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto rhs = the_stack.tr_pop<Binop_Rhs>();
+                        auto lhs = the_stack.tr_pop<Binop_Lhs>();
+
+                        push_instr_curf(p, new Binop(Binop_Op::store,
+                                                     std::move(lhs),
+                                                     std::move(rhs)));
+                }
+        };
+
+        template<> struct action <add> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        aop_stack.push_back(Binop_Op::add_Assign);
+                }
+        };
+
+        template<> struct action <sub> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        aop_stack.push_back(Binop_Op::sub_Assign);
+                }
+        };
+        template<> struct action <mult> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        aop_stack.push_back(Binop_Op::mult_Assign);
+                }
+        };
+        template<> struct action <band> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        aop_stack.push_back(Binop_Op::bit_And_Assign);
                 }
         };
 
 
+        template<> struct action <L1_aop> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto rhs = the_stack.tr_pop<Binop_Rhs>();
+                        auto lhs = the_stack.tr_pop<Binop_Lhs>();
 
-        Program L1_parse_file (char *fileName){
+                        push_instr_curf(p, new Binop(aop_stack.back(),
+                                                     std::move(lhs),
+                                                     std::move(rhs)));
+                        aop_stack.pop_back();
+                }
+        };
+
+        template<> struct action <left_shift> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        shop_stack.push_back(Shop_Op::left_Shift);
+                }
+        };
+
+        template<> struct action <right_shift> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        shop_stack.push_back(Shop_Op::right_Shift);
+                }
+        };
+
+
+        template<> struct action <L1_sop> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto target = the_stack.tr_pop<Writable_Reg>();
+                        auto shift = the_stack.tr_pop<Value_Source>();
+
+                        push_instr_curf(p, new Shop(shop_stack.back(),
+                                                    std::move(target),
+                                                    std::move(shift)));
+                        shop_stack.pop_back();
+                }
+        };
+
+
+///////////////////////////////////////////////////////////////////////////////
+//                                    Data                                   //
+///////////////////////////////////////////////////////////////////////////////
+
+        template<> struct action <reg> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.push(TrPtr(new Reg(in.string())));
+                }
+        };
+
+        template<> struct action <writable_reg> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.push(TrPtr(new Writable_Reg(in.string())));
+                }
+        };
+
+
+        template<> struct action <immediate> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.push(TrPtr(new Integer_Literal(in.string())));
+                }
+        };
+
+
+       template<> struct action <mem_offset> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.push(TrPtr(new Integer_Literal(in.string())));
+                }
+        };
+
+
+        template<> struct action <L1_mem_ref> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto off = the_stack.tr_pop<Integer_Literal>();
+                        auto base = the_stack.tr_pop<Reg>();
+
+                        the_stack.push(TrPtr(new Memory_Ref(*base, off->value)));
+                }
+        };
+
+        Program L1_parse_file (std::string fileName){
 
                 /*
                  * Check the grammar for some possible issues.
@@ -318,7 +484,7 @@ namespace L1 {
                  */
 
                 Program p;
-                pegtl::file_parser(fileName).parse< L1::grammar, L1::action >(p);
+                pegtl::file_parser(fileName).parse< L1::grammar, L1::action>(p);
 
                 return p;
         }
