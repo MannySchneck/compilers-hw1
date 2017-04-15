@@ -37,7 +37,7 @@ TEST_CASE("LEA"){
 TEST_CASE("monop"){
         std::stringstream ss;
 
-        Monop{Monop_Op::inc, {"rax"}}.translate(ss);
+        Monop{Monop_Op::inc, std::unique_ptr<Writable_Reg>{ new Writable_Reg{"rax"} }}.translate(ss);
 
         REQUIRE(ss.str() == "inc %rax");
 }

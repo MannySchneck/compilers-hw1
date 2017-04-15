@@ -45,6 +45,10 @@ namespace L1{
                   return instr_elements.back();
           }
 
+          void NUKE(){
+                  instr_elements.clear();
+          }
+
   private:
           std::deque<TrPtr> instr_elements;
   };

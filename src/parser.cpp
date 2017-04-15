@@ -13,7 +13,7 @@
 #include <deque>
 #include <sstream>
 
-#include <L1.h>
+#include "L1.h"
 #include "parser.h"
 #include <pegtl.hh>
 #include <pegtl/analyze.hh>
@@ -87,6 +87,9 @@ namespace L1 {
                 > {};
 
         struct L1_label_rule:
+                label{};
+
+        struct L1_inst_label:
                 label{};
 
         struct argument_reg :
@@ -165,20 +168,7 @@ namespace L1 {
                         source,
                         L1_mem_ref
                         >
-                >
-        // seq<
-        //         writable_reg,
-        //         seps,
-        //         left_arrow,
-        //         L1_mem_ref
-        //         >,
-        // seq<
-        //         mem_ref,
-        //         seps,
-        //         left_arrow,
-        //         source
-        //         >
-        {};
+                >{};
 
         struct add:
                 pegtl::string<'+','='>{};
@@ -191,7 +181,10 @@ namespace L1 {
 
         struct L1_aop :
                 pegtl::seq<
-                writable_reg,
+                pegtl::sor<
+                        writable_reg,
+                        L1_mem_ref
+                        >,
                 seps,
                 pegtl::sor<
                         add,
@@ -201,7 +194,10 @@ namespace L1 {
                         >,
                 seps,
                 pegtl::sor<
-                        source
+                        pegtl::sor<
+                                source,
+                                L1_mem_ref
+                                >
                         >
                 >{};
 
@@ -230,12 +226,28 @@ namespace L1 {
                         >
                 >{};
 
+        struct inc :
+                pegtl::string<'+','+'>{};
+        struct dec :
+                pegtl::string<'-','-'>{};
+
+
+        struct L1_monop :
+                pegtl::seq<
+                writable_reg,
+                seps,
+                pegtl::sor<inc,
+                           dec
+                           >
+                >{};
+
 
         struct L1_instruction :
                 pegtl::sor<
                 L1_basic_store,
                 L1_aop,
-                L1_sop
+                L1_sop,
+                L1_monop,
                 // L1_cjump,
                 // L1_label,
                 // L1_goto,
@@ -244,6 +256,7 @@ namespace L1 {
                 // L1_runtime_call,
                 // L1_monop,
                 // L1_lea
+                L1_inst_label
                 >{};
 
         struct L1_instruction_rule :
@@ -421,8 +434,8 @@ namespace L1 {
 
         template<> struct action <L1_sop> {
                 static void apply( const pegtl::input & in, L1::Program & p){
-                        auto target = the_stack.tr_pop<Writable_Reg>();
                         auto shift = the_stack.tr_pop<Value_Source>();
+                        auto target = the_stack.tr_pop<Writable_Reg>();
 
                         push_instr_curf(p, new Shop(shop_stack.back(),
                                                     std::move(target),
@@ -431,6 +444,34 @@ namespace L1 {
                 }
         };
 
+        template<> struct action <inc> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        monop_stack.push_back(Monop_Op::inc);
+                }
+        };
+        template<> struct action <dec> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        monop_stack.push_back(Monop_Op::dec);
+                }
+        };
+
+
+        template<> struct action <L1_monop> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto target = the_stack.tr_pop<Writable_Reg>();
+
+                        push_instr_curf(p, new Monop(monop_stack.back(),
+                                                     std::move(target)));
+                        monop_stack.pop_back();
+                }
+        };
+
+
+        template<> struct action<L1_instruction_rule>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.NUKE();
+                }
+        };
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                    Data                                   //
@@ -441,6 +482,13 @@ namespace L1 {
                         the_stack.push(TrPtr(new Reg(in.string())));
                 }
         };
+
+        template<> struct action <rcx> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.push(TrPtr(new Writable_Reg(in.string())));
+                }
+        };
+
 
         template<> struct action <writable_reg> {
                 static void apply( const pegtl::input & in, L1::Program & p){
@@ -456,7 +504,7 @@ namespace L1 {
         };
 
 
-       template<> struct action <mem_offset> {
+        template<> struct action <mem_offset> {
                 static void apply( const pegtl::input & in, L1::Program & p){
                         the_stack.push(TrPtr(new Integer_Literal(in.string())));
                 }

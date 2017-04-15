@@ -160,10 +160,18 @@ namespace L1{
         class Argument_Reg : public Reg
         {};
 
+
+// instructions
+        class Instruction : public virtual Translatable{
+        public:
+                //void translate(std::ostream&) const override;
+        };
+
 // label
         class L1_Label :
                 public Source,
-                public Callable
+                public Callable,
+                public Instruction
         {
         public:
                 L1_Label();
@@ -173,11 +181,6 @@ namespace L1{
                 std::string labelName;
         };
 
-// instructions
-        class Instruction : public virtual Translatable{
-        public:
-                //void translate(std::ostream&) const override;
-        };
 
         class Shop : public Instruction
         {
@@ -216,11 +219,11 @@ namespace L1{
 
         class Monop : public Instruction{
         public:
-                Monop(Monop_Op op, Writable_Reg target);
+                Monop(Monop_Op op, std::unique_ptr<Writable_Reg> target);
                 void translate(std::ostream&) const override;
         private:
                 Monop_Op  op;
-                Writable_Reg target;
+                std::unique_ptr<Writable_Reg> target;
         };
 
 // jumps
