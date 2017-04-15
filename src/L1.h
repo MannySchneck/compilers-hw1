@@ -230,10 +230,11 @@ namespace L1{
         class Goto : public Instruction{
         public:
                 Goto(std::string);
+                Goto(std::unique_ptr<L1_Label> target);
 
                 void translate(std::ostream&) const override;
         private:
-                L1_Label target;
+                std::unique_ptr<L1_Label> target;
         };
 
         class Cond_Jump : public Instruction{

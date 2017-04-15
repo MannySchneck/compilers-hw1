@@ -154,6 +154,7 @@ Cond_Jump::Cond_Jump(Cmp_Op cmp,
         true_target(true_target),
         false_target(false_target){}
 
+
 void output_const_cjump(int result, const L1_Label& t_target, const L1_Label& f_target, std::ostream& out){
         if(result){
                 out << "jmp ";
@@ -274,11 +275,14 @@ void Cond_Jump::translate(std::ostream& out) const{
 }
 
 Goto::Goto(std::string lab) :
-        target(lab){};
+        target(new L1_Label{lab}){};
+
+Goto::Goto(std::unique_ptr<L1_Label> lab) :
+        target(std::move(lab)){}
 
 void Goto::translate(std::ostream& out) const{
         out << "jmp ";
-        target.translate(out);
+        target->translate(out);
 }
 
 

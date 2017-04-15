@@ -92,6 +92,9 @@ namespace L1 {
         struct L1_inst_label:
                 label{};
 
+        struct L1_jmp_label:
+                label{};
+
         struct argument_reg :
                 pegtl::sor<
                 pegtl::string<'r','d','i'>,
@@ -130,6 +133,13 @@ namespace L1 {
                 reg,
                 immediate,
                 label
+                >{};
+
+        struct value_source:
+                pegtl::sor<
+                writable_reg,
+                reg,
+                immediate
                 >{};
 
         struct mem_offset :
@@ -241,6 +251,47 @@ namespace L1 {
                            >
                 >{};
 
+        struct L1_return :
+                pegtl::string<'r','e','t','u','r','n'>{};
+
+        struct L1_goto :
+                pegtl::seq<
+                pegtl::string<'g','o','t','o'>,
+                seps,
+                L1_jmp_label
+                >{};
+
+        struct le :
+                pegtl::string<'<'>{};
+        struct leq :
+                pegtl::string<'<','='>{};
+        struct eq :
+                pegtl::string<'='>{};
+
+
+        struct L1_cmp :
+                pegtl::sor<
+                le,
+                leq,
+                eq>{};
+
+        struct L1_cjump :
+                pegtl::seq<
+                pegtl::string<'c','j','u','m','p'>,
+                seps,
+                value_source,
+                seps,
+                L1_cmp,
+                seps,
+                value_source,
+                seps,
+                L1_jmp_label,
+                seps,
+                L1_jmp_label
+                >{};
+
+
+
 
         struct L1_instruction :
                 pegtl::sor<
@@ -248,26 +299,26 @@ namespace L1 {
                 L1_aop,
                 L1_sop,
                 L1_monop,
-                // L1_cjump,
-                // L1_label,
-                // L1_goto,
-                // L1_return,
+                L1_cjump,
+                L1_goto,
+                L1_return
                 // L1_call,
                 // L1_runtime_call,
-                // L1_monop,
                 // L1_lea
-                L1_inst_label
                 >{};
 
         struct L1_instruction_rule :
                 pegtl::seq<
                 seps,
-                pegtl::if_must<
-                        pegtl::one<'('>,
-                        seps,
-                        L1_instruction,
-                        seps,
-                        pegtl::one<')'>
+                pegtl::sor<
+                        pegtl::if_must<
+                                pegtl::one<'('>,
+                                seps,
+                                L1_instruction,
+                                seps,
+                                pegtl::one<')'>
+                                >,
+                        L1_inst_label
                         >
                 >{};
 
@@ -467,6 +518,52 @@ namespace L1 {
         };
 
 
+        template<> struct action <L1_inst_label> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        push_instr_curf(p, new L1_Label(in.string()));
+                }
+        };
+
+        template<> struct action <L1_goto>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto label = the_stack.tr_pop<L1_Label>();
+                        push_instr_curf(p, new Goto(std::move(label)));
+                }
+        };
+
+        template<> struct action <eq> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        cmp_stack.push_back(Cmp_Op::equal);
+                }
+        };
+        template<> struct action <leq> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        cmp_stack.push_back(Cmp_Op::less_Equal);
+                }
+        };
+        template<> struct action <le> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        cmp_stack.push_back(Cmp_Op::less);
+                }
+        };
+
+
+        template<> struct action <L1_cjump>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto f_target = *(the_stack.tr_pop<L1_Label>());
+                        auto t_target = *(the_stack.tr_pop<L1_Label>());
+                        auto rhs = the_stack.tr_pop<Value_Source>();
+                        auto lhs = the_stack.tr_pop<Value_Source>();
+                        push_instr_curf(p, new Cond_Jump(cmp_stack.back(),
+                                                         std::move(lhs),
+                                                         std::move(rhs),
+                                                         t_target,
+                                                         f_target));
+                        cmp_stack.pop_back();
+                }
+        };
+
+
         template<> struct action<L1_instruction_rule>{
                 static void apply( const pegtl::input & in, L1::Program & p){
                         the_stack.NUKE();
@@ -482,6 +579,7 @@ namespace L1 {
                         the_stack.push(TrPtr(new Reg(in.string())));
                 }
         };
+
 
         template<> struct action <rcx> {
                 static void apply( const pegtl::input & in, L1::Program & p){
@@ -519,6 +617,14 @@ namespace L1 {
                         the_stack.push(TrPtr(new Memory_Ref(*base, off->value)));
                 }
         };
+
+        template<> struct action <L1_jmp_label> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        the_stack.push(TrPtr(new L1_Label(in.string())));
+                }
+        };
+
+
 
         Program L1_parse_file (std::string fileName){
 
