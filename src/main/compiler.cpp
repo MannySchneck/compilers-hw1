@@ -48,7 +48,7 @@ int main(
         /* Generate x86_64 code
          */
 
-        fstream outfile("Prog.s", outfile.out);
+        fstream outfile("prog.S", outfile.out);
         p.translate(outfile);
 
         return 0;

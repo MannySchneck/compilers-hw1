@@ -139,21 +139,6 @@ namespace L1{
                 void translate(std::ostream&) const override;
         };
 
-        class Comparison_Store : public virtual Translatable
-        {
-        public:
-                Comparison_Store(Cmp_Op op,
-                                 std::unique_ptr<Value_Source> lhs,
-                                 std::unique_ptr<Value_Source> rhs,
-                                 Writable_Reg target);
-
-                void translate(std::ostream&) const override;
-        private:
-                Cmp_Op op;
-                Writable_Reg target;
-                std::unique_ptr<Value_Source> lhs;
-                std::unique_ptr<Value_Source> rhs;
-        };
 
 
 // a
@@ -166,6 +151,8 @@ namespace L1{
         public:
                 //void translate(std::ostream&) const override;
         };
+
+
 
 // label
         class L1_Label :
@@ -180,6 +167,17 @@ namespace L1{
                 void translate(std::ostream&) const override;
                 std::string labelName;
         };
+
+        class L1_Target_Label :
+                public L1_Label
+        {
+                public:
+                L1_Target_Label();
+                L1_Target_Label(std::string label);
+
+                void translate(std::ostream&) const override;
+        };
+
 
 
         class Shop : public Instruction
@@ -254,6 +252,24 @@ namespace L1{
                 L1_Label false_target;
         };
 
+        class Comparison_Store : public virtual Translatable,
+                                 public Instruction
+        {
+        public:
+                Comparison_Store(Cmp_Op op,
+                                 std::unique_ptr<Value_Source> lhs,
+                                 std::unique_ptr<Value_Source> rhs,
+                                 Writable_Reg target);
+
+                void translate(std::ostream&) const override;
+        private:
+                Cmp_Op op;
+                Writable_Reg target;
+                std::unique_ptr<Value_Source> lhs;
+                std::unique_ptr<Value_Source> rhs;
+        };
+
+
         class Return : public Instruction{
         public:
                 void translate(std::ostream&) const override;
@@ -296,13 +312,13 @@ namespace L1{
         class Function : public virtual Translatable{
         public:
                 Function() = default;
-                Function(L1_Label name, int64_t args, int64_t locals);
+                Function(L1_Target_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
 
                 void translate(std::ostream& outfile) const override;
                 int64_t stack_args() const;
 
-                L1_Label name;
+                L1_Target_Label name;
                 int64_t arguments;
                 int64_t locals;
                 std::vector<std::unique_ptr<Instruction>> instructions;

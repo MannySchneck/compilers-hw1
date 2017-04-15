@@ -16,6 +16,16 @@ TEST_CASE("Label translation"){
         REQUIRE(ss.str() == "_go");
 }
 
+TEST_CASE("marker Label translation"){
+        std::stringstream ss;
+
+        L1::L1_Target_Label lab(":go");
+
+        lab.translate(ss);
+
+        REQUIRE(ss.str() == "_go:");
+}
+
 TEST_CASE("memory Ref"){
         std::stringstream ss;
 
@@ -305,7 +315,7 @@ TEST_CASE("Function Translation"){
         std::stringstream ss;
 
         SECTION("no instructions"){
-                L1_Label flab(":funfunfun");
+                L1_Target_Label flab(":funfunfun");
                 L1::Function f{flab, 0, 1};
 
                 std::unique_ptr<Return> ret{};
@@ -313,25 +323,25 @@ TEST_CASE("Function Translation"){
                 f.translate(ss);
 
                 REQUIRE(ss.str() ==
-                        "_funfunfun"
+                        "_funfunfun:"
                         "\n\taddq $8, %rsp"
                         "\n\tretq");
         }
 
         SECTION("Spill args"){
-                L1_Label flab(":funfunfun");
+                L1_Target_Label flab(":funfunfun");
                 L1::Function f{flab, 7, 1};
 
                 f.translate(ss);
 
                 REQUIRE(ss.str() ==
-                        "_funfunfun"
+                        "_funfunfun:"
                         "\n\taddq $16, %rsp"
                         "\n\tretq");
         }
 
         SECTION("1 instruction"){
-                L1_Label flab(":funfunfun");
+                L1_Target_Label flab(":funfunfun");
                 L1::Function f{flab, 7, 1};
 
 
@@ -346,14 +356,14 @@ TEST_CASE("Function Translation"){
                 f.translate(ss);
 
                 REQUIRE(ss.str() ==
-                        "_funfunfun"
+                        "_funfunfun:"
                         "\n\taddq %rax, 0(%rdi)"
                         "\n\taddq $16, %rsp"
                         "\n\tretq");
         }
 
         SECTION("2 instructions"){
-                L1_Label flab(":funfunfun");
+                L1_Target_Label flab(":funfunfun");
                 L1::Function f{flab, 7, 1};
 
 
@@ -374,7 +384,7 @@ TEST_CASE("Function Translation"){
                 f.translate(ss);
 
                 REQUIRE(ss.str() ==
-                        "_funfunfun"
+                        "_funfunfun:"
                         "\n\taddq %rax, 0(%rdi)"
                         "\n\tmovq %r8, 8(%r9)"
                         "\n\taddq $16, %rsp"
@@ -383,7 +393,7 @@ TEST_CASE("Function Translation"){
 
 
         SECTION("label"){
-                L1_Label flab(":funfunfun");
+                L1_Target_Label flab(":funfunfun");
                 L1::Function f{flab, 7, 1};
 
                 std::unique_ptr<Return> ret{};
@@ -391,7 +401,7 @@ TEST_CASE("Function Translation"){
                 f.translate(ss);
 
                 REQUIRE(ss.str() ==
-                        "_funfunfun"
+                        "_funfunfun:"
                         "\n\taddq $16, %rsp"
                         "\n\tretq");
         }

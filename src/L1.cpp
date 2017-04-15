@@ -15,6 +15,14 @@ void L1::L1_Label::translate(std::ostream &out) const {
         out << "_" << labelName.substr(1, labelName.size());
 }
 
+L1_Target_Label::L1_Target_Label() = default;
+L1_Target_Label::L1_Target_Label(std::string name) :
+        L1_Label(name) {};
+void L1_Target_Label::translate(std::ostream &out) const {
+        L1_Label::translate(out);
+        out << ":";
+}
+
 Integer_Literal::Integer_Literal(std::string val){
         value = std::stoll(val);
 }
@@ -466,7 +474,7 @@ void Runtime_Call::translate(std::ostream& out) const{
 }
 
 
-Function::Function(L1_Label name, int64_t args, int64_t locals) :
+Function::Function(L1_Target_Label name, int64_t args, int64_t locals) :
         name(name),
         arguments(args),
         locals(locals){}
@@ -494,6 +502,8 @@ L1::Program::Program(std::string label) :
 void L1::Program::translate(std::ostream &out) const {
         out << prog_prefix;
 
+        out << "go:" << std::endl;
+
         for(auto it = callee_saves().cbegin(); it != callee_saves().cend(); ++it){
                 out << "\t" << "pushq" << "\t" << "%" << *it << "\n";
         }
@@ -513,4 +523,6 @@ void L1::Program::translate(std::ostream &out) const {
                 out << "\n";
                 fun->translate(out);
         }
+        out << "\n";
 }
+

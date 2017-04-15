@@ -132,7 +132,7 @@ namespace L1 {
                 writable_reg,
                 reg,
                 immediate,
-                label
+                L1_jmp_label
                 >{};
 
         struct value_source:
@@ -162,7 +162,7 @@ namespace L1 {
                         >
                 >{};
 
-        struct Left_arrow :
+        struct left_arrow :
                 pegtl::string<'<','-'>
         {};
 
@@ -172,7 +172,7 @@ namespace L1 {
                            writable_reg
                            >,
                 seps,
-                Left_arrow,
+                left_arrow,
                 seps,
                 pegtl::sor<
                         source,
@@ -275,6 +275,19 @@ namespace L1 {
                 leq,
                 eq>{};
 
+        struct L1_cmp_store :
+                pegtl::sor<
+                writable_reg,
+                seps,
+                left_arrow,
+                seps,
+                value_source,
+                seps,
+                L1_cmp,
+                seps,
+                value_source
+                >{};
+
         struct L1_cjump :
                 pegtl::seq<
                 pegtl::string<'c','j','u','m','p'>,
@@ -290,7 +303,54 @@ namespace L1 {
                 L1_jmp_label
                 >{};
 
+        struct call_target :
+                pegtl::sor<
+                L1_jmp_label,
+                writable_reg>{};
 
+        struct L1_call :
+                pegtl::seq<
+                pegtl::string<'c','a','l','l'>,
+                seps,
+                call_target,
+                seps,
+                immediate>{};
+
+        struct print :
+                pegtl::string<'p','r','i','n','t'>{};
+        struct alloc :
+                pegtl::string<'a','l','l','o','c','a','t','e'>{};
+        struct array_error :
+                pegtl::string<'a','r','r','a','y','-','e','r','r','o','r'>{};
+
+        struct runtime_fun :
+                pegtl::sor<
+                print,
+                alloc,
+                array_error>{};
+
+        struct L1_rt_call:
+                pegtl::seq<
+                pegtl::string<'c','a','l','l'>,
+                seps,
+                runtime_fun,
+                seps,
+                number>{};
+
+        struct L1_lea :
+                pegtl::seq<
+                writable_reg,
+                seps,
+                pegtl::if_must<
+                        pegtl::string<'@'>,
+                        seps,
+                        writable_reg,
+                        seps,
+                        writable_reg,
+                        seps,
+                        immediate
+                        >
+                >{};
 
 
         struct L1_instruction :
@@ -301,10 +361,10 @@ namespace L1 {
                 L1_monop,
                 L1_cjump,
                 L1_goto,
-                L1_return
-                // L1_call,
-                // L1_runtime_call,
-                // L1_lea
+                L1_return,
+                L1_call,
+                L1_rt_call,
+                L1_lea
                 >{};
 
         struct L1_instruction_rule :
@@ -520,7 +580,7 @@ namespace L1 {
 
         template<> struct action <L1_inst_label> {
                 static void apply( const pegtl::input & in, L1::Program & p){
-                        push_instr_curf(p, new L1_Label(in.string()));
+                        push_instr_curf(p, new L1_Target_Label(in.string()));
                 }
         };
 
@@ -563,6 +623,63 @@ namespace L1 {
                 }
         };
 
+
+        template<> struct action <L1_cmp_store>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto rhs = the_stack.tr_pop<Value_Source>();
+                        auto lhs = the_stack.tr_pop<Value_Source>();
+                        auto target = the_stack.tr_pop<Writable_Reg>();
+                        push_instr_curf(p, new Comparison_Store(cmp_stack.back(),
+                                                                std::move(lhs),
+                                                                std::move(rhs),
+                                                                *target));
+                        cmp_stack.pop_back();
+                }
+        };
+
+        template<> struct action <L1_call>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto arg_count = the_stack.tr_pop<Integer_Literal>();
+                        auto target = the_stack.tr_pop<Callable>();
+                        push_instr_curf(p, new Call(std::move(target),
+                                                    arg_count->value));
+                }
+        };
+
+        template<> struct action <print> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        rf_stack.push_back(Runtime_Fun::print);
+                }
+        };
+        template<> struct action <alloc> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        rf_stack.push_back(Runtime_Fun::alloc);
+                }
+        };
+        template<> struct action <array_error> {
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        rf_stack.push_back(Runtime_Fun::array_Error);
+                }
+        };
+
+
+        template<> struct action<L1_rt_call>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        push_instr_curf(p, new Runtime_Call(rf_stack.back()));
+                        rf_stack.pop_back();
+                }
+        };
+
+        template<> struct action<L1_lea>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        auto mult = the_stack.tr_pop<Integer_Literal>();
+                        auto offset = the_stack.tr_pop<Writable_Reg>();
+                        auto base = the_stack.tr_pop<Writable_Reg>();
+                        auto target = the_stack.tr_pop<Writable_Reg>();
+
+                        push_instr_curf(p, new LEA{*target, *base, *offset, mult->value});
+                }
+        };
 
         template<> struct action<L1_instruction_rule>{
                 static void apply( const pegtl::input & in, L1::Program & p){
