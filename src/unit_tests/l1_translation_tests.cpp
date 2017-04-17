@@ -324,8 +324,7 @@ TEST_CASE("Function Translation"){
 
                 REQUIRE(ss.str() ==
                         "_funfunfun:"
-                        "\n\taddq $8, %rsp"
-                        "\n\tretq");
+                        "\n\tsubq $8, %rsp\n\t");
         }
 
         SECTION("Spill args"){
@@ -336,8 +335,7 @@ TEST_CASE("Function Translation"){
 
                 REQUIRE(ss.str() ==
                         "_funfunfun:"
-                        "\n\taddq $16, %rsp"
-                        "\n\tretq");
+                        "\n\tsubq $16, %rsp\n\t");
         }
 
         SECTION("1 instruction"){
@@ -357,9 +355,9 @@ TEST_CASE("Function Translation"){
 
                 REQUIRE(ss.str() ==
                         "_funfunfun:"
+                        "\n\tsubq $16, %rsp"
                         "\n\taddq %rax, 0(%rdi)"
-                        "\n\taddq $16, %rsp"
-                        "\n\tretq");
+                        "\n\t");
         }
 
         SECTION("2 instructions"){
@@ -385,10 +383,10 @@ TEST_CASE("Function Translation"){
 
                 REQUIRE(ss.str() ==
                         "_funfunfun:"
+                        "\n\tsubq $16, %rsp"
                         "\n\taddq %rax, 0(%rdi)"
                         "\n\tmovq %r8, 8(%r9)"
-                        "\n\taddq $16, %rsp"
-                        "\n\tretq");
+                        "\n\t");
         }
 
 
@@ -402,8 +400,8 @@ TEST_CASE("Function Translation"){
 
                 REQUIRE(ss.str() ==
                         "_funfunfun:"
-                        "\n\taddq $16, %rsp"
-                        "\n\tretq");
+                        "\n\tsubq $16, %rsp"
+                        "\n\t");
         }
 }
 

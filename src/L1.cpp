@@ -163,7 +163,7 @@ Cond_Jump::Cond_Jump(Cmp_Op cmp,
         false_target(false_target){}
 
 
-void output_const_cjump(int result, const L1_Label& t_target, const L1_Label& f_target, std::ostream& out){
+void Cond_Jump::output_const_cjump(int result, const L1_Label& t_target, const L1_Label& f_target, std::ostream& out) const {
         if(result){
                 out << "jmp ";
                 t_target.translate(out);
@@ -173,12 +173,12 @@ void output_const_cjump(int result, const L1_Label& t_target, const L1_Label& f_
         }
 }
 
-void gen_cjump_text(Translatable* lhs,
+void Cond_Jump::gen_cjump_text(Translatable* lhs,
                     Translatable* rhs,
                     L1_Label t_t,
                     L1_Label f_t,
                     std::string jmp,
-                    std::ostream& out){
+                    std::ostream& out) const{
         output_comparison(lhs, rhs, out);
         out << "\n\t" << jmp << " ";
         t_t.translate(out);

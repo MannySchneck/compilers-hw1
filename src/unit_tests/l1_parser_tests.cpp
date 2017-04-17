@@ -7,7 +7,7 @@
 using namespace L1;
 
 Program parse(std::string path){
-        std::string base{"/home/manny/322/hw/compilers-hw1/src/unit_tests/progs/"};
+        std::string base{"/home/manny/322/hw/schneck-compiler/src/unit_tests/progs/"};
         base.append(path);
         return L1_parse_file(base);
 }
@@ -343,6 +343,8 @@ TEST_CASE("parsr (I hardly even know her!)"){
                 f->instructions.push_back(std::move(inst3));
                 f->instructions.push_back(std::move(inst2));
                 f->instructions.push_back(std::move(gone));
+                f->instructions.push_back(std::unique_ptr<Instruction>(new
+                                                                       Return(8)));
 
                 result.functions.push_back(std::move(f));
 
@@ -394,6 +396,8 @@ TEST_CASE("parsr (I hardly even know her!)"){
                 f->instructions.push_back(std::move(gone));
                 f->instructions.push_back(std::move(a_call));
                 f->instructions.push_back(std::move(b_call));
+                f->instructions.push_back(std::unique_ptr<Instruction>(new
+                                                                       Return(8)));
 
                 result.functions.push_back(std::move(f));
 
