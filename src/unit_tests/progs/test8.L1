@@ -1,0 +1,7 @@
+(:go
+  (:go
+    0 1
+    ; This is my comment
+    (rax++)
+  )
+)

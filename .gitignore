@@ -2,3 +2,7 @@
 /easy-parser-tests/test1.L1
 /obj/compiler.o
 /obj/parser.o
+*.L1
+*/tests
+./tests/*
+./tests/*
