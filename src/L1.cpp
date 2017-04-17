@@ -119,8 +119,8 @@ Comparison_Store::Comparison_Store(Cmp_Op op,
 
 enum class Cmp_Case{
         both_Int,
-                flip,
-                };
+        flip,
+        };
 
 void output_comparison(Translatable* lhs,
                        Translatable* rhs,
@@ -371,7 +371,7 @@ void Monop::translate(std::ostream& out) const{
                 target->translate(out);
                 break;
         case (Monop_Op::dec):
-                out << "dec";
+                out << "dec ";
                 target->translate(out);
                 break;
         }
@@ -402,6 +402,11 @@ void Binop::translate(std::ostream& out) const{
         default:
                 throw std::logic_error("Can't happen");
         }
+
+        if(dynamic_cast<L1_Label*>(rhs.get())){
+                out << "$";
+        }
+
         rhs->translate(out);
         out << ", ";
         lhs->translate(out);
@@ -464,15 +469,25 @@ void Runtime_Call::translate(std::ostream& out) const{
                 out << "print";
                 break;
         case (Runtime_Fun::alloc):
-                out << "alloc";
+                out << "allocate";
                 break;
         case (Runtime_Fun::array_Error):
-                out << "array_Error";
+                out << "array_error";
                 break;
 
         }
 }
 
+Return::Return(int64_t stack_shift):
+        stack_shift(stack_shift){}
+
+
+void Return::translate(std::ostream &out) const{
+        if(stack_shift){
+                out << "\n\taddq $" << stack_shift << ", %rsp";
+        }
+        out << "\n\tretq";
+}
 
 Function::Function(L1_Target_Label name, int64_t args, int64_t locals) :
         name(name),
@@ -483,17 +498,36 @@ int64_t Function::stack_args() const{
         return arguments < 6 ? 0 : arguments - 6;
 }
 
+
+int64_t Function::stack_shift() const{
+        return 8 * (locals  + stack_args());
+}
+
+void Function::expand_stack(std::ostream&out) const{
+        int _stack_shift = stack_shift();
+        if(_stack_shift){
+                out << "\n\tsubq $" << _stack_shift << ", %rsp";
+        }
+}
+
+void Function::shrink_stack(std::ostream&out) const{
+        int _stack_shift = stack_shift();
+        if(_stack_shift){
+                out << "\n\taddq $" << _stack_shift << ", %rsp";
+        }
+}
+
+
 void Function::translate(std::ostream &out) const{
         name.translate(out);
+
+        expand_stack(out);
 
         out << "\n\t";
         for(auto it = instructions.cbegin(); it != instructions.cend(); it++){
                 (*it)->translate(out);
                 out << "\n\t";
         }
-
-        out << "addq $" << 8 * (locals  + stack_args()) << ", %rsp";
-        out << "\n\t" << "retq";
 }
 
 L1::Program::Program(std::string label) :
@@ -525,4 +559,3 @@ void L1::Program::translate(std::ostream &out) const {
         }
         out << "\n";
 }
-

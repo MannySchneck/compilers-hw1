@@ -16,6 +16,7 @@
 #include "L1.h"
 #include "parser.h"
 #include <pegtl.hh>
+#include <pegtl/trace.hh>
 #include <pegtl/analyze.hh>
 #include <pegtl/contrib/raw_string.hh>
 
@@ -138,8 +139,8 @@ namespace L1 {
         struct value_source:
                 pegtl::sor<
                 writable_reg,
-                reg,
-                immediate
+                immediate,
+                reg
                 >{};
 
         struct mem_offset :
@@ -149,7 +150,7 @@ namespace L1 {
                 pegtl::seq<
                 pegtl::one<'('>,
                 seps,
-                pegtl::if_must<
+//                pegtl::if_must<
                         pegtl::string<'m','e','m'>,
                         seps,
                         pegtl::sor<
@@ -158,8 +159,9 @@ namespace L1 {
                                 >,
                         seps,
                         mem_offset,
+                        seps,
                         pegtl::one<')'>
-                        >
+                        //>
                 >{};
 
         struct left_arrow :
@@ -251,8 +253,6 @@ namespace L1 {
                            >
                 >{};
 
-        struct L1_return :
-                pegtl::string<'r','e','t','u','r','n'>{};
 
         struct L1_goto :
                 pegtl::seq<
@@ -271,12 +271,13 @@ namespace L1 {
 
         struct L1_cmp :
                 pegtl::sor<
-                le,
                 leq,
-                eq>{};
+                eq,
+                le
+                >{};
 
         struct L1_cmp_store :
-                pegtl::sor<
+                pegtl::seq<
                 writable_reg,
                 seps,
                 left_arrow,
@@ -294,13 +295,15 @@ namespace L1 {
                 seps,
                 value_source,
                 seps,
-                L1_cmp,
-                seps,
-                value_source,
-                seps,
-                L1_jmp_label,
-                seps,
-                L1_jmp_label
+                pegtl::if_must<
+                        L1_cmp,
+                        seps,
+                        value_source,
+                        seps,
+                        L1_jmp_label,
+                        seps,
+                        L1_jmp_label
+                        >
                 >{};
 
         struct call_target :
@@ -352,9 +355,12 @@ namespace L1 {
                         >
                 >{};
 
+        struct L1_return :
+                pegtl_string_t("return"){};
 
         struct L1_instruction :
                 pegtl::sor<
+                L1_cmp_store,
                 L1_basic_store,
                 L1_aop,
                 L1_sop,
@@ -364,19 +370,22 @@ namespace L1 {
                 L1_return,
                 L1_call,
                 L1_rt_call,
-                L1_lea
+                L1_lea,
+                L1_return
                 >{};
 
         struct L1_instruction_rule :
                 pegtl::seq<
                 seps,
                 pegtl::sor<
+                        pegtl::seq<
                         pegtl::if_must<
                                 pegtl::one<'('>,
                                 seps,
                                 L1_instruction,
                                 seps,
                                 pegtl::one<')'>
+                                                               >
                                 >,
                         L1_inst_label
                         >
@@ -401,7 +410,7 @@ namespace L1 {
                         seps,
                         L1_instructions_rule,
                         seps,
-                        pegtl::one< ')' >,
+                        pegtl::one<')'>,
                         seps
                         >
                 > {};
@@ -421,7 +430,7 @@ namespace L1 {
                 seps,
                 L1_functions_rule,
                 seps,
-                pegtl::one< ')' >,
+                pegtl::one<')'>,
                 seps
                 > { };
 
@@ -686,6 +695,13 @@ namespace L1 {
                         the_stack.NUKE();
                 }
         };
+
+        template<> struct action<L1_return>{
+                static void apply( const pegtl::input & in, L1::Program & p){
+                        push_instr_curf(p, new Return(p.functions.back()->stack_shift()));
+                }
+        };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                    Data                                   //

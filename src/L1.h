@@ -272,7 +272,9 @@ namespace L1{
 
         class Return : public Instruction{
         public:
+                Return(int64_t stack_shift);
                 void translate(std::ostream&) const override;
+                int64_t stack_shift;
         };
 
 // calls
@@ -317,6 +319,9 @@ namespace L1{
 
                 void translate(std::ostream& outfile) const override;
                 int64_t stack_args() const;
+                int64_t stack_shift() const;
+                void expand_stack(std::ostream&out) const;
+                void shrink_stack(std::ostream&out) const;
 
                 L1_Target_Label name;
                 int64_t arguments;
