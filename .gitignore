@@ -4,3 +4,8 @@
 /obj/parser.o
 /tests/*
 /*.S
+*.o
+/TAGS
+/a.out
+/bin
+/obj/catch_maino
