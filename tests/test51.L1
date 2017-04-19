@@ -1,7 +1,0 @@
-(:go
-  (:go
-    0 1
-    (rdi <- rax <= rbx)
-    (return)
-  )
-)

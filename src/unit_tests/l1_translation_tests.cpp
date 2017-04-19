@@ -1,5 +1,5 @@
-#include "../L1.h"
-#include "../catch.hpp"
+#include <L1.h>
+#include <catch.hpp>
 #include <sstream>
 #include <iostream>
 

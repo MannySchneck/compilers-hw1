@@ -1,6 +1,5 @@
-#include "../catch.hpp"
-#include "../catch.hpp"
-#include "../parser.h"
+#include <catch.hpp>
+#include <parser.h>
 #include <sstream>
 #include <iostream>
 

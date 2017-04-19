@@ -1,8 +1,8 @@
 #!/bin/bash
-
+tests_dir=tests/L1;
 passed=0 ;
 failed=0 ;
-cd tests ; 
+cd ${tests_dir} ; 
 for i in *.L1 ; do
 
   # If the output already exists, skip the current test
@@ -13,10 +13,10 @@ for i in *.L1 ; do
 
   # Generate the binary
   pushd ./ ;
-  cd ../ ;
-  ./L1c tests/${i} ;
-  ./a.out &> tests/${i}.out.tmp ;
-  cmp tests/${i}.out.tmp tests/${i}.out ;
+  cd ../.. ;
+  ./L1c ${tests_dir}/${i} ;
+  ./a.out &> ${tests_dir}/${i}.out.tmp ;
+  cmp ${tests_dir}/${i}.out.tmp ${tests_dir}/${i}.out ;
   if ! test $? -eq 0 ; then
     echo "  Failed" ;
     let failed=$failed+1 ;
