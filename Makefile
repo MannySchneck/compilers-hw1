@@ -40,6 +40,8 @@ CXX_COMPILE := $(CXX) $(CC_FLAGS) $(LD_FLAGS)
 
 all: dirs L2
 
+.PHONY: clean dirs
+
 dirs:
 	mkdir -p obj/L1/AST; mkdir -p obj/L2/AST ; mkdir -p bin; mkdir -p lib;
 
@@ -53,10 +55,10 @@ unit_test: $(L1_OBJ_FILES) $(L1_AST_OBJ) $(L2_OBJ_FILES) $(L2_AST_OBJ) $(UNIT_TE
 	 $(CXX_COMPILE) -o bin/$@ $^
 	./bin/unit_test
 
-$(UNIT_TEST_OBJ): obj/%.o: $(UNIT_TEST_SRC_DIR)/%.cpp dirs
+$(UNIT_TEST_OBJ): obj/%.o: $(UNIT_TEST_SRC_DIR)/%.cpp 
 	$(CXX_COMPILE) -c -o $@ $<
 
-$(UNIT_TEST_MAIN_OBJ) : $(UNIT_TEST_MAIN) dirs
+$(UNIT_TEST_MAIN_OBJ) : $(UNIT_TEST_MAIN) 
 	$(CXX_COMPILE) -c -o $@ $<
 ################################################################################
 # L1
@@ -67,12 +69,12 @@ L1: $(L1_OBJ_FILES) $(L1_MAIN_OBJ) $(L1_AST_OBJ)
 $(L1_MAIN_OBJ): $(L1_MAIN_CPP)
 	$(CXX_COMPILE) -c -o $@ $^
 
-$(L1_OBJ_FILES) : obj/%.o: src/%.cpp dirs
+$(L1_OBJ_FILES) : obj/%.o: src/%.cpp 
 	$(CXX_COMPILE) -c -o $@ $<
 
 
 
-$(L1_AST_OBJ) : obj/%.o: src/%.cpp dirs
+$(L1_AST_OBJ) : obj/%.o: src/%.cpp 
 	$(CXX_COMPILE) -c -o $@ $<
 
 
@@ -91,7 +93,7 @@ $(L2_MAIN_OBJ): $(L2_MAIN_CPP) $(L2_AST_OBJ)
 $(L2_OBJ_FILES) : obj/%.o: src/%.cpp
 	$(CXX_COMPILE) -c -o $@ $<
 
-$(L2_AST_OBJ) : obj/%.o: src/%.cpp dirs
+$(L2_AST_OBJ) : obj/%.o: src/%.cpp 
 	$(CXX_COMPILE) -c -o $@ $<
 
 
