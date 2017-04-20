@@ -1,14 +1,23 @@
 L1_SRC_DIR := src/L1
-L1_OBJ_DIR := obj/L1/
+L1_AST_DIR := src/L1/AST
+L1_OBJ_DIR := obj/
 
-L1_CPP_FILES := $(wildcard $(L1_SRC_DIR)/*.cpp)
+L1_AST_CPP := $(wildcard $(L1_AST_DIR)/*.cpp)
+L1_AST_OBJ := $(addprefix $(L1_OBJ_DIR),$(L1_AST_CPP:src/%.cpp=%.o))
+
+L1_CPP_FILES = $(wildcard $(L1_SRC_DIR)/*.cpp)
 L1_MAIN_CPP := $(wildcard $(L1_SRC_DIR)/main/*.cpp)
 
 L1_MAIN_OBJ := $(addprefix $(L1_OBJ_DIR),$(notdir $(L1_MAIN_CPP:.cpp=.o)))
-L1_OBJ_FILES := $(addprefix $(L1_OBJ_DIR),$(notdir $(L1_CPP_FILES:.cpp=.o)))
+L1_OBJ_FILES := $(addprefix $(L1_OBJ_DIR),$(L1_CPP_FILES:src/%.cpp=%.o))
 #L2
 L2_SRC_DIR := src/L2
 L2_OBJ_DIR := obj/L2/
+L2_AST_DIR := src/L2/AST
+L2_OBJ_DIR := obj/
+
+L1_AST_CPP := $(wildcard $(L1_AST_DIR)/*.cpp)
+L1_AST_OBJ := $(addprefix $(L1_OBJ_DIR),$(L1_AST_CPP:src/%.cpp=%.o))
 
 L2_CPP_FILES := $(wildcard $(L2_SRC_DIR)/*.cpp)
 L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/*.cpp)
@@ -33,7 +42,7 @@ CXX_COMPILE := $(CXX) $(CC_FLAGS) $(LD_FLAGS)
 all: dirs L2
 
 dirs:
-	mkdir -p obj/L1; mkdir -p obj/L2 ; mkdir -p bin;
+	mkdir -p obj/L1/AST; mkdir -p obj/L2 ; mkdir -p bin; mkdir -p lib;
 
 clean:
 	rm -rf bin/ obj/ *.out *.o *.S core.* tests/L1/*.tmp tests/liveness/*.tmp
@@ -53,14 +62,20 @@ $(UNIT_TEST_MAIN_OBJ) : $(UNIT_TEST_MAIN) dirs
 ################################################################################
 # L1
 ################################################################################
-L1: $(L1_OBJ_FILES) $(L1_MAIN_OBJ)
-	$(CXX_COMPILE) -o ./bin/$@ $^
+L1: $(L1_OBJ_FILES) $(L1_MAIN_OBJ) $(L1_AST_OBJ)
+	$(CXX_COMPILE)  $(L1_AST_OBJ) $(L1_OBJ_FILES) $(L1_MAIN_OBJ)  -o ./bin/$@ 
 
 $(L1_MAIN_OBJ): $(L1_MAIN_CPP)
 	$(CXX_COMPILE) -c -o $@ $^
 
 $(L1_OBJ_FILES) : obj/%.o: src/%.cpp dirs
 	$(CXX_COMPILE) -c -o $@ $<
+
+
+
+$(L1_AST_OBJ) : obj/%.o: src/%.cpp dirs
+	$(CXX_COMPILE) -c -o $@ $<
+
 
 L1_test: L1
 	./scripts/L1_test.sh
@@ -71,11 +86,15 @@ L1_test: L1
 L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
 
-$(L2_MAIN_OBJ): $(L2_MAIN_CPP)
+$(L2_MAIN_OBJ): $(L2_MAIN_CPP) $(L2_AST_OBJ)
 	$(CXX_COMPILE) -c -o $@ $^
 
 $(L2_OBJ_FILES) : obj/%.o: src/%.cpp
 	$(CXX_COMPILE) -c -o $@ $<
+
+$(L2_AST_OBJ) : obj/%.o: src/%.cpp dirs
+	$(CXX_COMPILE) -c -o $@ $<
+
 
 L2_test: L2
 	./scripts/test.sh

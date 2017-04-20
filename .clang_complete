@@ -1,1 +1,5 @@
 -std=c++11
+-Isrc/L1
+-Isrc/L2
+-Isrc
+-IPEGTL

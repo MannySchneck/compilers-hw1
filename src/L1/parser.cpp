@@ -13,7 +13,7 @@
 #include <deque>
 #include <sstream>
 
-#include "L1.h"
+#include <L1/AST/L1.h>
 #include "parser.h"
 #include <pegtl.hh>
 #include <pegtl/trace.hh>
