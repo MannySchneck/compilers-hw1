@@ -18,7 +18,8 @@ for i in *.L1 ; do
   ./a.out &> ${tests_dir}/${i}.out.tmp ;
   cmp ${tests_dir}/${i}.out.tmp ${tests_dir}/${i}.out ;
   if ! test $? -eq 0 ; then
-    echo "  Failed" ;
+    echo "test ${i}  Failed" ;
+    return -1
     let failed=$failed+1 ;
   else
     echo "  Passed" ;

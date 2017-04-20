@@ -12,18 +12,17 @@ L1_MAIN_OBJ := $(addprefix $(L1_OBJ_DIR),$(notdir $(L1_MAIN_CPP:.cpp=.o)))
 L1_OBJ_FILES := $(addprefix $(L1_OBJ_DIR),$(L1_CPP_FILES:src/%.cpp=%.o))
 #L2
 L2_SRC_DIR := src/L2
-L2_OBJ_DIR := obj/L2/
 L2_AST_DIR := src/L2/AST
 L2_OBJ_DIR := obj/
 
-L1_AST_CPP := $(wildcard $(L1_AST_DIR)/*.cpp)
-L1_AST_OBJ := $(addprefix $(L1_OBJ_DIR),$(L1_AST_CPP:src/%.cpp=%.o))
+L2_AST_CPP := $(wildcard $(L2_AST_DIR)/*.cpp)
+L2_AST_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_AST_CPP:src/%.cpp=%.o))
 
 L2_CPP_FILES := $(wildcard $(L2_SRC_DIR)/*.cpp)
 L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/*.cpp)
 
 L2_MAIN_OBJ := $(addprefix $(L2_OBJ_DIR),$(notdir $(L2_MAIN_CPP:.cpp=.o)))
-L2_OBJ_FILES := $(addprefix $(L2_OBJ_DIR),$(notdir $(L2_CPP_FILES:.cpp=.o)))
+L2_OBJ_FILES := $(addprefix $(L2_OBJ_DIR),$(L2_CPP_FILES:src/%.cpp=%.o))
 #tests
 UNIT_TEST_SRC_DIR := src/unit_tests
 UNIT_TEST_CPP_FILES := $(wildcard $(UNIT_TEST_SRC_DIR)/*.cpp)
@@ -42,7 +41,7 @@ CXX_COMPILE := $(CXX) $(CC_FLAGS) $(LD_FLAGS)
 all: dirs L2
 
 dirs:
-	mkdir -p obj/L1/AST; mkdir -p obj/L2 ; mkdir -p bin; mkdir -p lib;
+	mkdir -p obj/L1/AST; mkdir -p obj/L2/AST ; mkdir -p bin; mkdir -p lib;
 
 clean:
 	rm -rf bin/ obj/ *.out *.o *.S core.* tests/L1/*.tmp tests/liveness/*.tmp
@@ -50,7 +49,7 @@ clean:
 ################################################################################
 # unit tests
 ################################################################################
-unit_test: $(L1_OBJ_FILES) $(UNIT_TEST_OBJ) $(UNIT_TEST_MAIN_OBJ)
+unit_test: $(L1_OBJ_FILES) $(L1_AST_OBJ) $(L2_OBJ_FILES) $(L2_AST_OBJ) $(UNIT_TEST_OBJ) $(UNIT_TEST_MAIN_OBJ)
 	 $(CXX_COMPILE) -o bin/$@ $^
 	./bin/unit_test
 
@@ -83,7 +82,7 @@ L1_test: L1
 ################################################################################
 # L2
 ################################################################################
-L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ)
+L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
 
 $(L2_MAIN_OBJ): $(L2_MAIN_CPP) $(L2_AST_OBJ)
