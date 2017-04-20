@@ -20,7 +20,6 @@
 #include <pegtl/analyze.hh>
 #include <pegtl/contrib/raw_string.hh>
 
-
 namespace L2 {
 
         template<typename T>
@@ -30,9 +29,9 @@ namespace L2 {
         /*
          * Grammar rules from now on.
          */
-        struct label:
-                pegtl::seq<
-                pegtl::one<':'>,
+
+        struct L2_var :
+        pegtl::seq<
                 pegtl::plus<
                         pegtl::sor<
                                 pegtl::alpha,
@@ -46,7 +45,15 @@ namespace L2 {
                                 pegtl::digit
                                 >
                         >
-                > {};
+                >{};
+
+
+        struct label:
+                pegtl::if_must<
+                pegtl::one<':'>,
+                L2_var
+                >
+        {};
 
         struct entry_point_label:
                 label{};
@@ -96,12 +103,15 @@ namespace L2 {
         struct L2_jmp_label:
                 label{};
 
+        struct shift_reg :
+                pegtl::string<'r','c','x'>{};
+
         struct argument_reg :
                 pegtl::sor<
                 pegtl::string<'r','d','i'>,
                 pegtl::string<'r','s','i'>,
                 pegtl::string<'r','d','x'>,
-                pegtl::string<'r','c','x'>,
+                shift_reg,
                 pegtl::string<'r','8'>,
                 pegtl::string<'r','9'>
                 >{};
@@ -121,16 +131,31 @@ namespace L2 {
                 >
         {};
 
+        struct writable :
+                pegtl::sor<
+                writable_reg,
+                L2_var>{};
+
+
         struct reg :
-                pegtl::string<'r','s','p'>
+                pegtl::sor<
+                pegtl::string<'r','s','p'>,
+                writable_reg
+                >
         {};
 
         struct immediate:
                 number{};
 
+        struct shift_arg:
+                pegtl::sor<
+                immediate,
+                shift_reg,
+                L2_var>{};
+
         struct source :
                 pegtl::sor <
-                writable_reg,
+                writable,
                 reg,
                 immediate,
                 L2_jmp_label
@@ -138,7 +163,7 @@ namespace L2 {
 
         struct value_source:
                 pegtl::sor<
-                writable_reg,
+                writable,
                 immediate,
                 reg
                 >{};
@@ -150,18 +175,18 @@ namespace L2 {
                 pegtl::seq<
                 pegtl::one<'('>,
                 seps,
-//                pegtl::if_must<
-                        pegtl::string<'m','e','m'>,
-                        seps,
-                        pegtl::sor<
-                                reg,
-                                writable_reg
-                                >,
-                        seps,
-                        mem_offset,
-                        seps,
-                        pegtl::one<')'>
-                        //>
+                pegtl::if_must<
+                pegtl::string<'m','e','m'>,
+                seps,
+                pegtl::sor<
+                        reg,
+                        writable
+                        >,
+                seps,
+                mem_offset,
+                seps,
+                pegtl::one<')'>
+                >
                 >{};
 
         struct left_arrow :
@@ -171,7 +196,7 @@ namespace L2 {
         struct L2_basic_store :
                 pegtl::seq<
                 pegtl::sor<L2_mem_ref,
-                           writable_reg
+                           writable
                            >,
                 seps,
                 left_arrow,
@@ -194,7 +219,7 @@ namespace L2 {
         struct L2_aop :
                 pegtl::seq<
                 pegtl::sor<
-                        writable_reg,
+                        writable,
                         L2_mem_ref
                         >,
                 seps,
@@ -225,7 +250,7 @@ namespace L2 {
 
         struct L2_sop :
                 pegtl::seq<
-                writable_reg,
+                writable,
                 seps,
                 pegtl::sor<
                         left_shift,
@@ -246,7 +271,7 @@ namespace L2 {
 
         struct L2_monop :
                 pegtl::seq<
-                writable_reg,
+                writable,
                 seps,
                 pegtl::sor<inc,
                            dec
@@ -278,7 +303,7 @@ namespace L2 {
 
         struct L2_cmp_store :
                 pegtl::seq<
-                writable_reg,
+                writable,
                 seps,
                 left_arrow,
                 seps,
@@ -309,7 +334,7 @@ namespace L2 {
         struct call_target :
                 pegtl::sor<
                 L2_jmp_label,
-                writable_reg>{};
+                writable>{};
 
         struct L2_call :
                 pegtl::seq<
@@ -379,13 +404,13 @@ namespace L2 {
                 seps,
                 pegtl::sor<
                         pegtl::seq<
-                        pegtl::if_must<
-                                pegtl::one<'('>,
-                                seps,
-                                L2_instruction,
-                                seps,
-                                pegtl::one<')'>
-                                                               >
+                                pegtl::if_must<
+                                        pegtl::one<'('>,
+                                        seps,
+                                        L2_instruction,
+                                        seps,
+                                        pegtl::one<')'>
+                                        >
                                 >,
                         L2_inst_label
                         >
@@ -440,7 +465,7 @@ namespace L2 {
                 > {};
 
         // Globals... Fuck you PEGTL. Fuck You. Fuckfuckfuckfuck.
-        L2_Parse_Stack the_stack;
+        L2_Parse_Stack<TrPtr> the_stack;
 
         std::vector<Binop_Op> aop_stack;
         std::vector<Shop_Op> shop_stack;

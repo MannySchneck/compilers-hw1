@@ -47,6 +47,7 @@ dirs:
 
 clean:
 	rm -rf bin/ obj/ *.out *.o *.S core.* tests/L1/*.tmp tests/liveness/*.tmp
+	mkdir -p obj/L1/AST; mkdir -p obj/L2/AST ; mkdir -p bin; mkdir -p lib;
 
 ################################################################################
 # unit tests
