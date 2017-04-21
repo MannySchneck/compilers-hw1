@@ -10,3 +10,4 @@
 /bin
 /obj/catch_maino
 /pre-commit.sh
+*.out

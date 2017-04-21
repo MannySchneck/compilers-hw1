@@ -30,8 +30,8 @@ namespace L2 {
          * Grammar rules from now on.
          */
 
-        struct L2_var :
-        pegtl::seq<
+        struct L2_var_text :
+                pegtl::seq<
                 pegtl::plus<
                         pegtl::sor<
                                 pegtl::alpha,
@@ -47,11 +47,14 @@ namespace L2 {
                         >
                 >{};
 
+        struct L2_var :
+                L2_var_text{};
+
 
         struct label:
                 pegtl::if_must<
                 pegtl::one<':'>,
-                L2_var
+                L2_var_text
                 >
         {};
 
@@ -131,6 +134,9 @@ namespace L2 {
                 >
         {};
 
+        struct rsp :
+                pegtl::string<'r','s','p'>{};
+
         struct writable :
                 pegtl::sor<
                 writable_reg,
@@ -139,10 +145,17 @@ namespace L2 {
 
         struct reg :
                 pegtl::sor<
-                pegtl::string<'r','s','p'>,
+                rsp,
                 writable_reg
                 >
         {};
+
+        struct x :
+                pegtl::sor<
+                reg,
+                writable
+                >{};
+
 
         struct immediate:
                 number{};
@@ -176,22 +189,33 @@ namespace L2 {
                 pegtl::one<'('>,
                 seps,
                 pegtl::if_must<
-                pegtl::string<'m','e','m'>,
-                seps,
-                pegtl::sor<
-                        reg,
-                        writable
-                        >,
-                seps,
-                mem_offset,
-                seps,
-                pegtl::one<')'>
-                >
+                        pegtl::string<'m','e','m'>,
+                        seps,
+                        x,
+                        seps,
+                        mem_offset,
+                        seps,
+                        pegtl::one<')'>
+                        >
                 >{};
 
         struct left_arrow :
                 pegtl::string<'<','-'>
         {};
+
+        struct stack_arg :
+                pegtl::seq<
+                pegtl::one<'('>,
+                seps,
+                pegtl::if_must<
+                pegtl_string_t("stack-arg"),
+                seps,
+                immediate
+                        >,
+                seps,
+                pegtl::one<')'>
+                >{};
+
 
         struct L2_basic_store :
                 pegtl::seq<
@@ -203,7 +227,8 @@ namespace L2 {
                 seps,
                 pegtl::sor<
                         source,
-                        L2_mem_ref
+                        L2_mem_ref,
+                        stack_arg
                         >
                 >{};
 
@@ -465,7 +490,7 @@ namespace L2 {
                 > {};
 
         // Globals... Fuck you PEGTL. Fuck You. Fuckfuckfuckfuck.
-        L2_Parse_Stack<TrPtr> the_stack;
+        L2_Parse_Stack<ASTPtr> the_stack;
 
         std::vector<Binop_Op> aop_stack;
         std::vector<Shop_Op> shop_stack;
@@ -520,8 +545,8 @@ namespace L2 {
 ///////////////////////////////////////////////////////////////////////////////
         template<> struct action <L2_basic_store> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto rhs = the_stack.tr_pop<Binop_Rhs>();
-                        auto lhs = the_stack.tr_pop<Binop_Lhs>();
+                        auto rhs = the_stack.downcast_pop<Binop_Rhs>();
+                        auto lhs = the_stack.downcast_pop<Binop_Lhs>();
 
                         push_instr_curf(p, new Binop(Binop_Op::store,
                                                      std::move(lhs),
@@ -554,8 +579,8 @@ namespace L2 {
 
         template<> struct action <L2_aop> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto rhs = the_stack.tr_pop<Binop_Rhs>();
-                        auto lhs = the_stack.tr_pop<Binop_Lhs>();
+                        auto rhs = the_stack.downcast_pop<Binop_Rhs>();
+                        auto lhs = the_stack.downcast_pop<Binop_Lhs>();
 
                         push_instr_curf(p, new Binop(aop_stack.back(),
                                                      std::move(lhs),
@@ -579,8 +604,8 @@ namespace L2 {
 
         template<> struct action <L2_sop> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto shift = the_stack.tr_pop<Value_Source>();
-                        auto target = the_stack.tr_pop<Writable_Reg>();
+                        auto shift = the_stack.downcast_pop<Value_Source>();
+                        auto target = the_stack.downcast_pop<Writable_Reg>();
 
                         push_instr_curf(p, new Shop(shop_stack.back(),
                                                     std::move(target),
@@ -603,7 +628,7 @@ namespace L2 {
 
         template<> struct action <L2_monop> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto target = the_stack.tr_pop<Writable_Reg>();
+                        auto target = the_stack.downcast_pop<Writable_Reg>();
 
                         push_instr_curf(p, new Monop(monop_stack.back(),
                                                      std::move(target)));
@@ -620,7 +645,7 @@ namespace L2 {
 
         template<> struct action <L2_goto>{
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto label = the_stack.tr_pop<L2_Label>();
+                        auto label = the_stack.downcast_pop<L2_Label>();
                         push_instr_curf(p, new Goto(std::move(label)));
                 }
         };
@@ -644,10 +669,10 @@ namespace L2 {
 
         template<> struct action <L2_cjump>{
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto f_target = *(the_stack.tr_pop<L2_Label>());
-                        auto t_target = *(the_stack.tr_pop<L2_Label>());
-                        auto rhs = the_stack.tr_pop<Value_Source>();
-                        auto lhs = the_stack.tr_pop<Value_Source>();
+                        auto f_target = *(the_stack.downcast_pop<L2_Label>());
+                        auto t_target = *(the_stack.downcast_pop<L2_Label>());
+                        auto rhs = the_stack.downcast_pop<Value_Source>();
+                        auto lhs = the_stack.downcast_pop<Value_Source>();
                         push_instr_curf(p, new Cond_Jump(cmp_stack.back(),
                                                          std::move(lhs),
                                                          std::move(rhs),
@@ -660,9 +685,9 @@ namespace L2 {
 
         template<> struct action <L2_cmp_store>{
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto rhs = the_stack.tr_pop<Value_Source>();
-                        auto lhs = the_stack.tr_pop<Value_Source>();
-                        auto target = the_stack.tr_pop<Writable_Reg>();
+                        auto rhs = the_stack.downcast_pop<Value_Source>();
+                        auto lhs = the_stack.downcast_pop<Value_Source>();
+                        auto target = the_stack.downcast_pop<Writable_Reg>();
                         push_instr_curf(p, new Comparison_Store(cmp_stack.back(),
                                                                 std::move(lhs),
                                                                 std::move(rhs),
@@ -673,8 +698,8 @@ namespace L2 {
 
         template<> struct action <L2_call>{
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto arg_count = the_stack.tr_pop<Integer_Literal>();
-                        auto target = the_stack.tr_pop<Callable>();
+                        auto arg_count = the_stack.downcast_pop<Integer_Literal>();
+                        auto target = the_stack.downcast_pop<Callable>();
                         push_instr_curf(p, new Call(std::move(target),
                                                     arg_count->value));
                 }
@@ -706,10 +731,10 @@ namespace L2 {
 
         template<> struct action<L2_lea>{
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto mult = the_stack.tr_pop<Integer_Literal>();
-                        auto offset = the_stack.tr_pop<Writable_Reg>();
-                        auto base = the_stack.tr_pop<Writable_Reg>();
-                        auto target = the_stack.tr_pop<Writable_Reg>();
+                        auto mult = the_stack.downcast_pop<Integer_Literal>();
+                        auto offset = the_stack.downcast_pop<Writable_Reg>();
+                        auto base = the_stack.downcast_pop<Writable_Reg>();
+                        auto target = the_stack.downcast_pop<Writable_Reg>();
 
                         push_instr_curf(p, new LEA{*target, *base, *offset, mult->value});
                 }
@@ -731,58 +756,63 @@ namespace L2 {
 ///////////////////////////////////////////////////////////////////////////////
 //                                    Data                                   //
 ///////////////////////////////////////////////////////////////////////////////
-
-        template<> struct action <reg> {
+        template<> struct action <rsp> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        the_stack.push(TrPtr(new Reg(in.string())));
+                        the_stack.push(ASTPtr(new Reg(in.string())));
                 }
         };
-
 
         template<> struct action <rcx> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        the_stack.push(TrPtr(new Writable_Reg(in.string())));
+                        the_stack.push(ASTPtr(new Writable_Reg(in.string())));
                 }
         };
-
 
         template<> struct action <writable_reg> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        the_stack.push(TrPtr(new Writable_Reg(in.string())));
+                        the_stack.push(ASTPtr(new Writable_Reg(in.string())));
                 }
         };
-
 
         template<> struct action <immediate> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        the_stack.push(TrPtr(new Integer_Literal(in.string())));
+                        the_stack.push(ASTPtr(new Integer_Literal(in.string())));
                 }
         };
 
-
         template<> struct action <mem_offset> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        the_stack.push(TrPtr(new Integer_Literal(in.string())));
+                        the_stack.push(ASTPtr(new Integer_Literal(in.string())));
                 }
         };
 
 
         template<> struct action <L2_mem_ref> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto off = the_stack.tr_pop<Integer_Literal>();
-                        auto base = the_stack.tr_pop<Reg>();
+                        auto off = the_stack.downcast_pop<Integer_Literal>();
+                        auto base = the_stack.downcast_pop<X>();
+                        the_stack.push(ASTPtr(new Memory_Ref(std::move(base), off->value)));
+                }
+        };
 
-                        the_stack.push(TrPtr(new Memory_Ref(*base, off->value)));
+        template<> struct action <stack_arg> {
+                static void apply( const pegtl::input & in, L2::Program & p){
+                        auto off = the_stack.downcast_pop<Integer_Literal>();
+                        the_stack.push(ASTPtr(new Stack_Arg(off->value)));
                 }
         };
 
         template<> struct action <L2_jmp_label> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        the_stack.push(TrPtr(new L2_Label(in.string())));
+                        the_stack.push(ASTPtr(new L2_Label(in.string())));
                 }
         };
 
-
+        template<> struct action <L2_var> {
+                static void apply( const pegtl::input & in, L2::Program & p){
+                        the_stack.push( ASTPtr(new Var(in.string())));
+                }
+        };
 
         Program L2_parse_file (std::string fileName){
 

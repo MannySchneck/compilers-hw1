@@ -7,44 +7,35 @@ Call::Call(std::unique_ptr<Callable> fun, int64_t numargs) :
         fun(std::move(fun)),
         numargs(numargs){}
 
-void Call::translate(std::ostream& out) const{
-        out << "subq $8, %rsp";
-        out << "\n\tjmp ";
-
-        if(dynamic_cast<Writable_Reg*>(fun.get())){
-                out << "*";
-                fun->translate(out);
-        } else {
-                fun->translate(out);
-        }
-}
-
 Runtime_Call::Runtime_Call(Runtime_Fun fun) :
         fun(fun){}
 
-void Runtime_Call::translate(std::ostream& out) const{
-        out << "call ";
-        switch(fun){
-        case (Runtime_Fun::print):
-                out << "print";
-                break;
-        case (Runtime_Fun::alloc):
-                out << "allocate";
-                break;
-        case (Runtime_Fun::array_Error):
-                out << "array_error";
-                break;
 
-        }
-}
 
 
 void Call::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << "(call ";
+        fun->dump(out);
+        out << " " << numargs;
+        out << ")";
 }
 
 void Runtime_Call::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << "(call ";
+        switch(fun){
+        case(Runtime_Fun::print):
+                "print 1";
+                break;
+        case(Runtime_Fun::alloc):
+                "alocate 2";
+                break;
+        case(Runtime_Fun::array_Error):
+                "array-error 2";
+                break;
+        }
+
+
+        out << " ";
+        out << ")";
+
 }
-
-

@@ -9,7 +9,6 @@ namespace L2{
         {
         public:
                 Integer_Literal(std::string);
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
                 int64_t value;
         };

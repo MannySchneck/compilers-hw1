@@ -11,7 +11,6 @@ namespace L2 {
                     Writable_Reg base,
                     Writable_Reg offset,
                     int64_t mult);
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         private:
                 Writable_Reg target;

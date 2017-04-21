@@ -8,7 +8,7 @@
 
 namespace L2{
 
-        class Translatable : public AST_Item{
+        class Translatable {
         public:
                 virtual void translate(std::ostream&) const= 0;
                 virtual ~Translatable() {};

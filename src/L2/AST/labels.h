@@ -7,15 +7,14 @@
 namespace L2 {
 
         class L2_Label :
-                public Source,
-                public Callable,
-                public Instruction
+                public virtual Source,
+                public virtual Callable,
+                public virtual Instruction
         {
         public:
                 L2_Label();
                 L2_Label(std::string label);
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
                 std::string labelName;
         };
@@ -27,7 +26,6 @@ namespace L2 {
                 L2_Target_Label();
                 L2_Target_Label(std::string label);
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         };
 

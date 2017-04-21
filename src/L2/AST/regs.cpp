@@ -34,16 +34,8 @@ Writable_Reg::Writable_Reg(std::string name) :
         Reg(name) {}
 
 
-void Writable_Reg::translate(std::ostream& out) const{
-        Reg::translate(out);
-}
-
-void Reg::translate(std::ostream& out) const{
-        out << "%" << name;
-}
-
 void Reg::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << name;
 }
 
 void Writable_Reg::dump(std::ostream &out) const{

@@ -10,13 +10,9 @@ Goto::Goto(std::string lab) :
 Goto::Goto(std::unique_ptr<L2_Label> lab) :
         target(std::move(lab)){}
 
-void Goto::translate(std::ostream& out) const{
-        out << "jmp ";
-        target->translate(out);
-}
-
-
-
 void Goto::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << "(";
+        out << "goto ";
+        target->dump(out);
+        out << ")";
 }

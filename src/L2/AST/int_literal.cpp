@@ -6,10 +6,6 @@ Integer_Literal::Integer_Literal(std::string val){
         value = std::stoll(val);
 }
 
-void Integer_Literal::translate(std::ostream &out) const{
-        out << "$" << value;
-}
-
 void Integer_Literal::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << value;
 }

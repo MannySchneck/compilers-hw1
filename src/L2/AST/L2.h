@@ -10,12 +10,16 @@
 #include <exception>
 #include <unordered_map>
 
+#include <L2/AST/ast_item.h>
 #include <L2/AST/translatable.h>
 #include <L2/AST/marker_classes.h>
 
 #include <L2/AST/labels.h>
 #include <L2/AST/regs.h>
 #include <L2/AST/int_literal.h>
+#include <L2/AST/var.h>
+#include <L2/AST/memory_ref.h>
+#include <L2/AST/stack_arg.h>
 
 #include <L2/AST/binop.h>
 #include <L2/AST/monop.h>
@@ -27,7 +31,6 @@
 
 #include <L2/AST/lea.h>
 #include <L2/AST/return.h>
-#include <L2/AST/memory_ref.h>
 #include <L2/AST/calls.h>
 #include <L2/AST/goto.h>
 #include <L2/AST/function.h>

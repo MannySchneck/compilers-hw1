@@ -9,7 +9,7 @@ namespace L2{
 
         template<typename T>
         template<typename expected_T>
-        std::unique_ptr<expected_T> L2_Parse_Stack<T>::tr_pop(){
+        std::unique_ptr<expected_T> L2_Parse_Stack<T>::downcast_pop(){
                 expected_T* ptr;
 
                 T p = pop();
@@ -18,9 +18,13 @@ namespace L2{
                         return std::unique_ptr<expected_T>(ptr);
                 }
                 else {
-                        std::cout << "WHAT THE FUCK" << std::endl;
                         std::stringstream ss;
-                        ss << std::string("bad downcast to ") <<  typeid(expected_T).name();
+                        ss << std::string("bad downcast to ")
+                           <<  typeid(expected_T).name()
+                           << " from "
+                           << typeid(T).name()
+                           << " with ast dump: ";
+                        p->dump(ss);
                         throw std::logic_error(ss.str());
                 }
         }

@@ -13,6 +13,14 @@ std::string make_test_name(int i){
         return name.str();
 }
 
+std::string make_out_name(int i){
+        std::stringstream name;
+        name << "/home/manny/322/hw/schneck-compiler/src/unit_tests/L2_progs/test" << i << ".L2f.out";
+
+        return name.str();
+}
+
+
 std::string slurp_fun(std::ifstream& in, int i){
         std::stringstream ss;
         in.open(make_test_name(i), std::ios::in);
@@ -22,19 +30,26 @@ std::string slurp_fun(std::ifstream& in, int i){
 }
 
 TEST_CASE("Function_parser matches Input file"){
-        std::stringstream parsed;
         std::ifstream L2f;
+        std::ofstream L2f_out;
 
-        for(int i =1; i <= 20; i++){
-                SECTION("Parsed matches input"){
+        SECTION("Parsed matches input"){
+                for(int i =1; i <= 20; i++){
                         std::string test_function = slurp_fun(L2f, i);
+                        std::stringstream parsed{};
 
-                        L2::Function parsed_fun = L2::parse_function_file(make_test_name(i));
+                        std::cout << i << std::endl;
+
+                        L2::Function parsed_fun =
+                                L2::parse_function_file(make_test_name(i));
 
                         parsed_fun.dump(parsed);
 
+                        L2f_out.open(make_out_name(i));
+                        L2f_out << parsed.str();
+                        L2f_out.close();
+
                         REQUIRE(parsed.str() == test_function);
                 }
-
         }
 }

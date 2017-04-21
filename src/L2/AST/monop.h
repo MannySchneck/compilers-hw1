@@ -13,7 +13,6 @@ namespace L2{
         class Monop : public Instruction{
         public:
                 Monop(Monop_Op op, std::unique_ptr<Writable_Reg> target);
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         private:
                 Monop_Op  op;

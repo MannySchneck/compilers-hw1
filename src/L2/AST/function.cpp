@@ -31,17 +31,16 @@ void Function::shrink_stack(std::ostream&out) const{
 }
 
 
-void Function::translate(std::ostream &out) const{
-        name.translate(out);
-
-        expand_stack(out);
-
-        out << "\n\t";
-        for(auto it = instructions.cbegin(); it != instructions.cend(); it++){
-                (*it)->translate(out);
-                out << "\n\t";
-        }
-}
 void Function::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << "(";
+        name.dump(out);
+        out << std::endl;
+        out << arguments << " " << locals << std::endl;
+
+        for(auto& inst : instructions){
+                inst->dump(out);
+                out << std::endl;
+        }
+
+        out << ")" << std::endl;
 }

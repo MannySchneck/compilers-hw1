@@ -31,7 +31,7 @@ UNIT_TEST_MAIN := $(UNIT_TEST_SRC_DIR)/main/catch_main.cpp
 UNIT_TEST_OBJ := $(addprefix obj/,$(notdir $(UNIT_TEST_CPP_FILES:.cpp=.o)))
 UNIT_TEST_MAIN_OBJ:= $(addprefix obj/,$(notdir $(UNIT_TEST_MAIN:.cpp=.o)))
 
-CC_FLAGS := --std=c++11 -I./$(L1_SRC_DIR) -I./src -I./src/L2 -I./PEGTL -g3 -Wno-write-strings
+CC_FLAGS := --std=c++11 -I./$(L1_SRC_DIR) -I./src -I./src/L2 -I./PEGTL  -g3 -Wno-write-strings
 LD_FLAGS :=
 CXX := g++
 

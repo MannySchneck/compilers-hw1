@@ -13,7 +13,6 @@ namespace L2 {
         class Runtime_Call : public Instruction{
         public:
                 Runtime_Call(Runtime_Fun fun);
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         private:
                 Runtime_Fun fun;
@@ -23,7 +22,6 @@ namespace L2 {
         public:
                 Call(std::unique_ptr<Callable> fun, int64_t numargs);
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         private:
                 std::unique_ptr<Callable> fun;

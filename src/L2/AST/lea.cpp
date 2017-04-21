@@ -13,16 +13,6 @@ LEA::LEA(Writable_Reg target, Writable_Reg base, Writable_Reg offset, int64_t mu
         }
 }
 
-void LEA::translate(std::ostream& out) const{
-        out << "lea (";
-        base.translate(out);
-        out << ", ";
-        offset.translate(out);
-        out << ", " << mult;
-        out << "), ";
-        target.translate(out);
-}
-
 void LEA::dump(std::ostream &out) const{
-        out << "ACK!";
+        out << "lea!";
 }

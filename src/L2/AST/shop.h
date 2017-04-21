@@ -18,7 +18,6 @@ namespace L2{
                 Shop(Shop_Op,
                      std::unique_ptr<Writable_Reg>,
                      std::unique_ptr<Value_Source>);
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         private:
                 Shop_Op op;

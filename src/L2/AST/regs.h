@@ -14,8 +14,8 @@ namespace L2{
 
                 Reg get_eight_bit() const;
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
+
         private:
                 std::string name;
                 static const std::unordered_map<std::string, std::string> eight_bit_name;
@@ -25,12 +25,10 @@ namespace L2{
 // w
         class Writable_Reg :
                 public Reg,
-                public Callable,
                 public Writable
         {
         public:
                 Writable_Reg(std::string);
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
         };
 

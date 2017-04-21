@@ -7,8 +7,7 @@
 
 namespace L2{
 
-        class Comparison_Store : public virtual Translatable,
-                                 public Instruction
+        class Comparison_Store : public Instruction
         {
         public:
                 Comparison_Store(Cmp_Op op,
@@ -16,7 +15,6 @@ namespace L2{
                                  std::unique_ptr<Value_Source> rhs,
                                  Writable_Reg target);
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
 
         private:

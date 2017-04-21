@@ -7,14 +7,12 @@
 namespace L2{
         class Memory_Ref :
                 public Binop_Rhs,
-                public Binop_Lhs,
-                public virtual Translatable {
+                public Binop_Lhs {
         public:
-                Memory_Ref(Reg base, int64_t offset);
-                void translate(std::ostream&) const override;
+                Memory_Ref(std::unique_ptr<X> base, int64_t offset);
                 void dump(std::ostream &out) const override;
         private:
-                Reg base;
+                std::unique_ptr<X> base;
                 int64_t offset;
         };
 

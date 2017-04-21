@@ -5,47 +5,56 @@
 
 namespace L2{
 
-        class Instruction : public virtual Translatable{
+        class Instruction : public virtual AST_Item{
         protected:
                 Instruction() = default;
         };
 
 
-        class Binop_Rhs : public virtual Translatable{
+        class Binop_Rhs : public virtual AST_Item{
         protected:
                 Binop_Rhs() = default;
         };
 
-        class Binop_Lhs : public virtual Translatable{
+        class Binop_Lhs : public virtual AST_Item{
         protected:
                 Binop_Lhs() = default;
         };
 
 
-// s
+          // s
         class Source :
-                public Binop_Rhs,
-                public virtual Translatable{
-                };
+                public virtual Binop_Rhs,
+                public virtual AST_Item{
+        };
 
-        class Callable : public virtual Translatable{
+        // u
+        class Callable : public virtual AST_Item{
         protected:
                 Callable() {};
         };
 
-        class Writable :
-                public virtual Translatable,
-                public Binop_Lhs
-                {
-                protected:
-                        Writable(){};
-                };
+        //x
+        class X:
+                public virtual AST_Item{};
 
-// t
-        class Value_Source : public Source{
+        //w
+        class Writable :
+                public virtual AST_Item,
+                public Callable,
+                public Binop_Lhs,
+                public virtual Binop_Rhs,
+                public virtual X
+        {
+        protected:
+                Writable(){};
+        };
+
+
+        // t
+        class Value_Source : public virtual Source,
+                             public virtual X{
         protected:
                 Value_Source() {};
         };
 }
-
-

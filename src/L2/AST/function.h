@@ -5,13 +5,12 @@
 
 namespace L2{
 
-        class Function : public virtual Translatable{
+        class Function : public virtual AST_Item{
         public:
                 Function() = default;
                 Function(L2_Target_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
 
-                void translate(std::ostream& outfile) const override;
                 void dump(std::ostream &out) const override;
 
                 int64_t stack_args() const;

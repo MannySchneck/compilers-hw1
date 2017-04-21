@@ -5,7 +5,7 @@
 #include <L2/AST/function.h>
 
 namespace L2{
-        class Program : public virtual Translatable{
+        class Program : public virtual AST_Item{
         public:
 
                 Program() = default;
@@ -15,7 +15,6 @@ namespace L2{
 
                 ~Program() override = default;
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
 
                 L2_Label entryPointLabel;

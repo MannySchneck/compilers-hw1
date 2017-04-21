@@ -17,7 +17,6 @@ namespace L2 {
         {
         public:
                 Binop(Binop_Op op, std::unique_ptr<Binop_Lhs> lhs, std::unique_ptr<Binop_Rhs> rhs);
-                void translate(std::ostream&) const override;
 
                 void dump(std::ostream &out) const override;
 

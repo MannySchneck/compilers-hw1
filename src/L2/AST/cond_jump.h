@@ -10,12 +10,11 @@ namespace L2{
         class Cond_Jump : public Instruction{
         public:
                 Cond_Jump(Cmp_Op cmp,
-                          std::unique_ptr<Value_Source> Cmp_Lhs,
-                          std::unique_ptr<Value_Source> Cmp_Rhs,
+                          std::unique_ptr<Value_Source> cmp_lhs,
+                          std::unique_ptr<Value_Source> cmp_rhs,
                           L2_Label true_target,
                           L2_Label false_target);
 
-                void translate(std::ostream&) const override;
                 void dump(std::ostream &out) const override;
 
                 void output_const_cjump(int result,
@@ -32,8 +31,8 @@ namespace L2{
 
         private:
                 Cmp_Op cmp;
-                std::unique_ptr<Value_Source> Cmp_Lhs;
-                std::unique_ptr<Value_Source> Cmp_Rhs;
+                std::unique_ptr<Value_Source> cmp_lhs;
+                std::unique_ptr<Value_Source> cmp_rhs;
                 L2_Label true_target;
                 L2_Label false_target;
         };
