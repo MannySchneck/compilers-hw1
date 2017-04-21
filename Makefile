@@ -4,9 +4,11 @@ L1_OBJ_DIR := obj/
 
 L1_AST_CPP := $(wildcard $(L1_AST_DIR)/*.cpp)
 L1_AST_OBJ := $(addprefix $(L1_OBJ_DIR),$(L1_AST_CPP:src/%.cpp=%.o))
+L1_AST_HDR:= $(L1_AST_CPP:%.cpp=%.h)
 
 L1_CPP_FILES = $(wildcard $(L1_SRC_DIR)/*.cpp)
 L1_MAIN_CPP := $(wildcard $(L1_SRC_DIR)/main/*.cpp)
+L1_HDR_FILES := $(L1_CPP_FILES:%.cpp=%.h)
 
 L1_MAIN_OBJ := $(addprefix $(L1_OBJ_DIR),$(notdir $(L1_MAIN_CPP:.cpp=.o)))
 L1_OBJ_FILES := $(addprefix $(L1_OBJ_DIR),$(L1_CPP_FILES:src/%.cpp=%.o))
@@ -17,9 +19,11 @@ L2_OBJ_DIR := obj/
 
 L2_AST_CPP := $(wildcard $(L2_AST_DIR)/*.cpp)
 L2_AST_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_AST_CPP:src/%.cpp=%.o))
+L2_AST_HDR:= $(L2_AST_CPP:%.cpp=%.h)
 
 L2_CPP_FILES := $(wildcard $(L2_SRC_DIR)/*.cpp)
 L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/*.cpp)
+L2_HDR_FILES := $(L2_CPP_FILES:%.cpp=%.h)
 
 L2_MAIN_OBJ := $(addprefix $(L2_OBJ_DIR),$(notdir $(L2_MAIN_CPP:.cpp=.o)))
 L2_OBJ_FILES := $(addprefix $(L2_OBJ_DIR),$(L2_CPP_FILES:src/%.cpp=%.o))
@@ -78,6 +82,12 @@ $(L1_OBJ_FILES) : obj/%.o: src/%.cpp
 $(L1_AST_OBJ) : obj/%.o: src/%.cpp 
 	$(CXX_COMPILE) -c -o $@ $<
 
+$(L1_AST_CPP) : %.cpp:%.h
+	touch $@
+
+$(L1_CPP_FILES) : %.cpp:%.h
+	touch $@
+
 
 L1_test: L1
 	./scripts/L1_test.sh
@@ -96,6 +106,12 @@ $(L2_OBJ_FILES) : obj/%.o: src/%.cpp
 
 $(L2_AST_OBJ) : obj/%.o: src/%.cpp 
 	$(CXX_COMPILE) -c -o $@ $<
+
+$(L2_AST_CPP) : %.cpp:%.h
+	touch $@
+
+$(L2_CPP_FILES) : %.cpp:%.h
+	touch $@
 
 
 L2_test: L2
