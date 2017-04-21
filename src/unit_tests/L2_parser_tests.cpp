@@ -8,14 +8,14 @@
 
 std::string make_test_name(int i){
         std::stringstream name;
-        name << "/home/manny/322/hw/schneck-compiler/src/unit_tests/L2_progs/test" << i << ".L2f";
+        name << "/home/manny/322/hw/compiler/src/unit_tests/L2_progs/test" << i << ".L2f";
 
         return name.str();
 }
 
 std::string make_out_name(int i){
         std::stringstream name;
-        name << "/home/manny/322/hw/schneck-compiler/src/unit_tests/L2_progs/test" << i << ".L2f.out";
+        name << "/home/manny/322/hw/compiler/src/unit_tests/L2_progs/test" << i << ".L2f.out";
 
         return name.str();
 }
@@ -38,7 +38,6 @@ TEST_CASE("Function_parser matches Input file"){
                         std::string test_function = slurp_fun(L2f, i);
                         std::stringstream parsed{};
 
-                        std::cout << i << std::endl;
 
                         L2::Function parsed_fun =
                                 L2::parse_function_file(make_test_name(i));

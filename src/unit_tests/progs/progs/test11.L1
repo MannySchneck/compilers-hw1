@@ -1,0 +1,13 @@
+(:go
+  (:go
+    0 1
+    ; This is my comment
+    :lab
+    (rax++)
+    (cjump r13 = rsi :true :false)
+    (goto :hi)
+    (call rax 1)
+    (call :lab 2)
+    (return)
+  )
+)

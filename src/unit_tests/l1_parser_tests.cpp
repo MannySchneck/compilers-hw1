@@ -6,7 +6,7 @@
 using namespace L1;
 
 Program parse(std::string path){
-        std::string base{"/home/manny/322/hw/schneck-compiler/src/unit_tests/progs/"};
+        std::string base{"/home/manny/322/hw/compiler/src/unit_tests/progs/"};
         base.append(path);
         return L1_parse_file(base);
 }
