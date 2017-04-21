@@ -14,6 +14,6 @@ namespace L2{
         template <typename T>
         using compiler_ptr = std::unique_ptr<T>;
 
-        using ASTPtr = std::unique_ptr<AST_Item>;
+        using ASTPtr = compiler_ptr<AST_Item>;
 
 } // L2

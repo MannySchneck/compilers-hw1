@@ -16,14 +16,14 @@ namespace L2 {
         class Binop : public Instruction
         {
         public:
-                Binop(Binop_Op op, std::unique_ptr<Binop_Lhs> lhs, std::unique_ptr<Binop_Rhs> rhs);
+                Binop(Binop_Op op, compiler_ptr<Binop_Lhs> lhs, compiler_ptr<Binop_Rhs> rhs);
 
                 void dump(std::ostream &out) const override;
 
         private:
-                std::unique_ptr<Binop_Lhs> lhs;
+                compiler_ptr<Binop_Lhs> lhs;
                 Binop_Op op;
-                std::unique_ptr<Binop_Rhs> rhs;
+                compiler_ptr<Binop_Rhs> rhs;
         };
 
 

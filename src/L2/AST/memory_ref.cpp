@@ -2,7 +2,7 @@
 
 using namespace L2;
 
-Memory_Ref::Memory_Ref(std::unique_ptr<X> base, int64_t offset) :
+Memory_Ref::Memory_Ref(compiler_ptr<X> base, int64_t offset) :
         base(std::move(base)),
         offset(offset)
 {

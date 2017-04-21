@@ -2,7 +2,7 @@
 
 using namespace L2;
 
-Monop::Monop(Monop_Op op, std::unique_ptr<Writable_Reg> target) :
+Monop::Monop(Monop_Op op, compiler_ptr<Writable_Reg> target) :
         op(op),
         target(std::move(target)){};
 

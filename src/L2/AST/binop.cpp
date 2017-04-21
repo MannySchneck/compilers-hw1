@@ -4,7 +4,7 @@
 
 using namespace L2;
 
-Binop::Binop(Binop_Op op, std::unique_ptr<Binop_Lhs> lhs, std::unique_ptr<Binop_Rhs> rhs):
+Binop::Binop(Binop_Op op, compiler_ptr<Binop_Lhs> lhs, compiler_ptr<Binop_Rhs> rhs):
         lhs(std::move(lhs)),
         op(op),
         rhs(std::move(rhs)) {}

@@ -8,11 +8,11 @@ namespace L2 {
         class Goto : public Instruction{
         public:
                 Goto(std::string);
-                Goto(std::unique_ptr<L2_Label> target);
+                Goto(compiler_ptr<L2_Label> target);
 
                 void dump(std::ostream &out) const override;
         private:
-                std::unique_ptr<L2_Label> target;
+                compiler_ptr<L2_Label> target;
         };
 
 

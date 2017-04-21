@@ -18,7 +18,7 @@ namespace L2{
                 void dump(std::ostream &out) const override;
 
                 L2_Label entryPointLabel;
-                std::vector<std::unique_ptr<Function>> functions;
+                std::vector<compiler_ptr<Function>> functions;
 
         private:
                 static const char* prog_prefix;

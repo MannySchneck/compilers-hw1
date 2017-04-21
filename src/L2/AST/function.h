@@ -21,6 +21,6 @@ namespace L2{
                 L2_Target_Label name;
                 int64_t arguments;
                 int64_t locals;
-                std::vector<std::unique_ptr<Instruction>> instructions;
+                std::vector<compiler_ptr<Instruction>> instructions;
         };
 }

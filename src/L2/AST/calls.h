@@ -20,11 +20,11 @@ namespace L2 {
 
         class Call : public Instruction{
         public:
-                Call(std::unique_ptr<Callable> fun, int64_t numargs);
+                Call(compiler_ptr<Callable> fun, int64_t numargs);
 
                 void dump(std::ostream &out) const override;
         private:
-                std::unique_ptr<Callable> fun;
+                compiler_ptr<Callable> fun;
                 int64_t numargs;
         };
 

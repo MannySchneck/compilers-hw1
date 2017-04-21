@@ -9,13 +9,13 @@ namespace L2{
 
         template<typename T>
         template<typename expected_T>
-        std::unique_ptr<expected_T> L2_Parse_Stack<T>::downcast_pop(){
+        compiler_ptr<expected_T> L2_Parse_Stack<T>::downcast_pop(){
                 expected_T* ptr;
 
                 T p = pop();
                 if((ptr = dynamic_cast<expected_T*>(p.get()))){
                         p.release();
-                        return std::unique_ptr<expected_T>(ptr);
+                        return compiler_ptr<expected_T>(ptr);
                 }
                 else {
                         std::stringstream ss;

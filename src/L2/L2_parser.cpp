@@ -23,7 +23,7 @@
 namespace L2 {
 
         template<typename T>
-        using uptr = std::unique_ptr<T>;
+        using uptr = compiler_ptr<T>;
 
 
         /*
@@ -500,7 +500,7 @@ namespace L2 {
 
         void push_instr_curf(Program &p, Instruction* i){
                 const auto& currentF = p.functions.back();
-                currentF->instructions.push_back(std::unique_ptr<Instruction>(i));
+                currentF->instructions.push_back(compiler_ptr<Instruction>(i));
         }
 
         /*
@@ -518,7 +518,7 @@ namespace L2 {
 
         template<> struct action < function_name > {
                 static void apply(const pegtl::input &in, Program &p){
-                        std::unique_ptr<L2::Function> newF(new L2::Function());
+                        compiler_ptr<L2::Function> newF(new L2::Function());
                         newF->name = in.string();
                         p.functions.push_back(std::move(newF));
                 }

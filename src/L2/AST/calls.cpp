@@ -3,7 +3,7 @@
 using namespace L2;
 
 
-Call::Call(std::unique_ptr<Callable> fun, int64_t numargs) :
+Call::Call(compiler_ptr<Callable> fun, int64_t numargs) :
         fun(std::move(fun)),
         numargs(numargs){}
 

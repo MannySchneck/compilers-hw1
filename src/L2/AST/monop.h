@@ -12,11 +12,11 @@ namespace L2{
 
         class Monop : public Instruction{
         public:
-                Monop(Monop_Op op, std::unique_ptr<Writable_Reg> target);
+                Monop(Monop_Op op, compiler_ptr<Writable_Reg> target);
                 void dump(std::ostream &out) const override;
         private:
                 Monop_Op  op;
-                std::unique_ptr<Writable_Reg> target;
+                compiler_ptr<Writable_Reg> target;
         };
 
 }

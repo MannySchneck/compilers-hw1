@@ -9,7 +9,7 @@ namespace L2{
                 void push(T item);
 
                 template<typename expected_T>
-                std::unique_ptr<expected_T> downcast_pop();
+                compiler_ptr<expected_T> downcast_pop();
 
                 T pop();
 

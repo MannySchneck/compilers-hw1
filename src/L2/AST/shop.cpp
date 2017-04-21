@@ -4,7 +4,7 @@
 
 using namespace L2;
 
-Shop::Shop(Shop_Op op, std::unique_ptr<Writable_Reg> lhs, std::unique_ptr<Value_Source> rhs):
+Shop::Shop(Shop_Op op, compiler_ptr<Writable_Reg> lhs, compiler_ptr<Value_Source> rhs):
         op(op),
         lhs(std::move(lhs)),
         rhs(std::move(rhs)){}

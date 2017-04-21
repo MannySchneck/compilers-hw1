@@ -14,5 +14,5 @@ namespace L2{
                 virtual ~Translatable() {};
         };
 
-        using TrPtr = std::unique_ptr<Translatable>;
+        using TrPtr = compiler_ptr<Translatable>;
 }

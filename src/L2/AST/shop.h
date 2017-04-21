@@ -16,12 +16,12 @@ namespace L2{
         {
         public:
                 Shop(Shop_Op,
-                     std::unique_ptr<Writable_Reg>,
-                     std::unique_ptr<Value_Source>);
+                     compiler_ptr<Writable_Reg>,
+                     compiler_ptr<Value_Source>);
                 void dump(std::ostream &out) const override;
         private:
                 Shop_Op op;
-                std::unique_ptr<Writable_Reg> lhs;
-                std::unique_ptr<Value_Source> rhs;
+                compiler_ptr<Writable_Reg> lhs;
+                compiler_ptr<Value_Source> rhs;
         };
 }

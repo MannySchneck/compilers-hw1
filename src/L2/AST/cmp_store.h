@@ -11,8 +11,8 @@ namespace L2{
         {
         public:
                 Comparison_Store(Cmp_Op op,
-                                 std::unique_ptr<Value_Source> lhs,
-                                 std::unique_ptr<Value_Source> rhs,
+                                 compiler_ptr<Value_Source> lhs,
+                                 compiler_ptr<Value_Source> rhs,
                                  Writable_Reg target);
 
                 void dump(std::ostream &out) const override;
@@ -28,8 +28,8 @@ namespace L2{
 
                 Cmp_Op op;
                 Writable_Reg target;
-                std::unique_ptr<Value_Source> lhs;
-                std::unique_ptr<Value_Source> rhs;
+                compiler_ptr<Value_Source> lhs;
+                compiler_ptr<Value_Source> rhs;
         };
 
 }

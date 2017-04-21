@@ -4,8 +4,8 @@
 using namespace L2;
 
 Comparison_Store::Comparison_Store(Cmp_Op op,
-                                   std::unique_ptr<Value_Source> lhs,
-                                   std::unique_ptr<Value_Source> rhs,
+                                   compiler_ptr<Value_Source> lhs,
+                                   compiler_ptr<Value_Source> rhs,
                                    Writable_Reg target) :
         op(op),
         target(target),

@@ -7,7 +7,7 @@ using namespace L2;
 Goto::Goto(std::string lab) :
         target(new L2_Label{lab}){};
 
-Goto::Goto(std::unique_ptr<L2_Label> lab) :
+Goto::Goto(compiler_ptr<L2_Label> lab) :
         target(std::move(lab)){}
 
 void Goto::dump(std::ostream &out) const{

@@ -6,8 +6,8 @@
 using namespace L2;
 
 Cond_Jump::Cond_Jump(Cmp_Op cmp,
-                     std::unique_ptr<Value_Source> cmp_lhs,
-                     std::unique_ptr<Value_Source> cmp_rhs,
+                     compiler_ptr<Value_Source> cmp_lhs,
+                     compiler_ptr<Value_Source> cmp_rhs,
                      L2_Label true_target,
                      L2_Label false_target) :
         cmp(cmp),
