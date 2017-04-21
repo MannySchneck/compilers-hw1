@@ -12,7 +12,7 @@ namespace L2{
         };
 
         template <typename T>
-        using compiler_ptr = std::unique_ptr<T>;
+        using compiler_ptr = std::shared_ptr<T>;
 
         using ASTPtr = compiler_ptr<AST_Item>;
 

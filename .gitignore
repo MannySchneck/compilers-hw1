@@ -2,13 +2,11 @@
 /easy-parser-tests/test1.L1
 /obj/compiler.o
 /obj/parser.o
-/tests/*
 /*.S
 *.o
 /TAGS
 /a.out
 /bin
 /obj/catch_maino
-/pre-commit.sh
 *.out
 *.bak
