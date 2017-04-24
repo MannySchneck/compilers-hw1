@@ -34,4 +34,3 @@ void Binop::dump(std::ostream &out) const{
         rhs->dump(out);
         out << ")";
 }
-

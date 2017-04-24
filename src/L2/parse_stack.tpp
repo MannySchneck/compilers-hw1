@@ -14,8 +14,8 @@ namespace L2{
 
                 T p = pop();
                 if((ptr = dynamic_cast<expected_T*>(p.get()))){
-                        p.release();
-                        return compiler_ptr<expected_T>(ptr);
+                        //p.release();
+                        return compiler_ptr<expected_T>(p, ptr);
                 }
                 else {
                         std::stringstream ss;

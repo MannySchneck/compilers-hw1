@@ -35,6 +35,7 @@ TEST_CASE("Function_parser matches Input file"){
 
         SECTION("Parsed matches input"){
                 for(int i =1; i <= 20; i++){
+                        //std::cout << "running test number " << i << std::endl;
                         std::string test_function = slurp_fun(L2f, i);
                         std::stringstream parsed{};
 
