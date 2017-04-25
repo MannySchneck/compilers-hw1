@@ -10,3 +10,4 @@
 /obj/catch_maino
 *.out
 *.bak
+*.tmp
