@@ -44,3 +44,15 @@ void Cond_Jump::dump(std::ostream &out) const{
         out << " "; false_target.dump(out);
         out << ")";
 }
+
+io_set_t Cond_Jump::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Cond_Jump::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

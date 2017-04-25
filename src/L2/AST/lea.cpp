@@ -1,4 +1,6 @@
 #include <L2/AST/lea.h>
+#include <unordered_set>
+#include <string>
 
 using namespace L2;
 
@@ -15,4 +17,16 @@ LEA::LEA(Writable_Reg target, Writable_Reg base, Writable_Reg offset, int64_t mu
 
 void LEA::dump(std::ostream &out) const{
         out << "lea!";
+}
+
+io_set_t LEA::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t LEA::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
 }

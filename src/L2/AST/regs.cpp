@@ -4,11 +4,14 @@
 using namespace L2;
 
 Reg::Reg(std::string name) :
-        name(name){}
+        L2_ID(name){}
+
+Reg::~Reg() = default;
 
 Reg Reg::get_eight_bit() const{
         return Reg(eight_bit_name.at(name));
 }
+
 
 const std::unordered_map<std::string, std::string> Reg::eight_bit_name =
 {

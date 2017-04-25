@@ -2,6 +2,7 @@
 
 #include <ostream>
 #include <memory>
+#include <prettyprint.hpp>
 
 namespace L2{
 
@@ -15,5 +16,4 @@ namespace L2{
         using compiler_ptr = std::shared_ptr<T>;
 
         using ASTPtr = compiler_ptr<AST_Item>;
-
 } // L2

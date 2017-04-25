@@ -39,3 +39,28 @@ void Runtime_Call::dump(std::ostream &out) const{
         out << ")";
 
 }
+
+
+io_set_t Call::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Call::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}
+
+io_set_t Runtime_Call::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Runtime_Call::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

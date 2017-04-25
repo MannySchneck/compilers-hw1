@@ -11,6 +11,10 @@ namespace L2 {
                 Goto(compiler_ptr<L2_Label> target);
 
                 void dump(std::ostream &out) const override;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
         private:
                 compiler_ptr<L2_Label> target;
         };

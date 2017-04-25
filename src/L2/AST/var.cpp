@@ -3,7 +3,7 @@
 using namespace L2;
 
 Var::Var(std::string name) :
-        name(name){}
+        L2_ID(name){}
 
 void Var::dump(std::ostream &out) const{
         out << name;

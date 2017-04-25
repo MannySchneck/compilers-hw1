@@ -8,6 +8,11 @@ namespace L2 {
         public:
                 Return(int64_t stack_shift);
                 void dump(std::ostream &out) const override;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
+
                 int64_t stack_shift;
         };
 

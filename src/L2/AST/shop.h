@@ -18,7 +18,12 @@ namespace L2{
                 Shop(Shop_Op,
                      compiler_ptr<Writable_Reg>,
                      compiler_ptr<Value_Source>);
+
                 void dump(std::ostream &out) const override;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
         private:
                 Shop_Op op;
                 compiler_ptr<Writable_Reg> lhs;

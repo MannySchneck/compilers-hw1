@@ -25,3 +25,15 @@ void L2_Target_Label::dump(std::ostream &out) const{
         L2_Label::dump(out);
 }
 
+
+io_set_t L2_Label::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t L2_Label::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

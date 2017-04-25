@@ -9,7 +9,7 @@ namespace L2 {
         class L2_Label :
                 public virtual Source,
                 public virtual Callable,
-                public virtual Instruction
+                public Instruction
         {
         public:
                 L2_Label();
@@ -17,6 +17,11 @@ namespace L2 {
 
                 void dump(std::ostream &out) const override;
                 std::string labelName;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
+
         };
 
         class L2_Target_Label :

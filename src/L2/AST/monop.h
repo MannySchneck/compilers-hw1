@@ -14,6 +14,10 @@ namespace L2{
         public:
                 Monop(Monop_Op op, compiler_ptr<Writable_Reg> target);
                 void dump(std::ostream &out) const override;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
         private:
                 Monop_Op  op;
                 compiler_ptr<Writable_Reg> target;

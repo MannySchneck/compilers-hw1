@@ -20,3 +20,16 @@ void Monop::dump(std::ostream &out) const{
         }
         out << ")";
 }
+
+
+io_set_t Monop::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Monop::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

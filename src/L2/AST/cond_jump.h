@@ -17,6 +17,7 @@ namespace L2{
 
                 void dump(std::ostream &out) const override;
 
+
                 void output_const_cjump(int result,
                                         const L2_Label& t_target,
                                         const L2_Label& f_target,
@@ -28,6 +29,9 @@ namespace L2{
                                     L2_Label f_t,
                                     std::string jmp,
                                     std::ostream& out) const;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
 
         private:
                 Cmp_Op cmp;

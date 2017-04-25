@@ -14,6 +14,10 @@ namespace L2 {
         public:
                 Runtime_Call(Runtime_Fun fun);
                 void dump(std::ostream &out) const override;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
         private:
                 Runtime_Fun fun;
         };
@@ -23,6 +27,10 @@ namespace L2 {
                 Call(compiler_ptr<Callable> fun, int64_t numargs);
 
                 void dump(std::ostream &out) const override;
+
+                io_set_t gen() const override;
+                io_set_t kill() const override;
+
         private:
                 compiler_ptr<Callable> fun;
                 int64_t numargs;

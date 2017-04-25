@@ -16,3 +16,15 @@ void Goto::dump(std::ostream &out) const{
         target->dump(out);
         out << ")";
 }
+
+io_set_t Goto::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Goto::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

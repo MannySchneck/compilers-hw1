@@ -18,3 +18,15 @@ Comparison_Store::Comparison_Store(Cmp_Op op,
 void Comparison_Store::dump(std::ostream &out) const{
         out << "cmp stor!";
 }
+
+io_set_t Comparison_Store::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Comparison_Store::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

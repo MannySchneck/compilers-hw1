@@ -7,7 +7,9 @@
 
 namespace L2{
         class Reg :
-                public Value_Source
+                public virtual Value_Source,
+                public X,
+                public L2_ID
         {
         public:
                 Reg(std::string name);
@@ -16,8 +18,9 @@ namespace L2{
 
                 void dump(std::ostream &out) const override;
 
+                virtual ~Reg();
+
         private:
-                std::string name;
                 static const std::unordered_map<std::string, std::string> eight_bit_name;
 
         };

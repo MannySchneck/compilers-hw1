@@ -23,3 +23,15 @@ void Shop::dump(std::ostream &out) const{
         rhs->dump(out);
         out << ")";
 }
+
+io_set_t Shop::gen() const{
+        io_set_t gen_st;
+
+        return gen_st;
+}
+
+io_set_t Shop::kill() const{
+        io_set_t kill_st;
+
+        return kill_st;
+}

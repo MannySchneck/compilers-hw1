@@ -32,6 +32,8 @@ UNIT_TEST_SRC_DIR := src/unit_tests
 UNIT_TEST_CPP_FILES := $(wildcard $(UNIT_TEST_SRC_DIR)/*.cpp)
 UNIT_TEST_MAIN := $(UNIT_TEST_SRC_DIR)/main/catch_main.cpp
 
+SRCS := $(UNIT_TEST_CPP_FILES) $(L2_AST_CPP) $(L2_CPP_FILES) $(L2_MAIN_CPP) $(L1_AST_CPP) $(L1_CPP_FILES) $(L1_MAIN_CPP)
+
 UNIT_TEST_OBJ := $(addprefix obj/,$(notdir $(UNIT_TEST_CPP_FILES:.cpp=.o)))
 UNIT_TEST_MAIN_OBJ:= $(addprefix obj/,$(notdir $(UNIT_TEST_MAIN:.cpp=.o)))
 
@@ -116,3 +118,5 @@ $(L2_CPP_FILES) : %.cpp:%.h
 
 L2_test: L2
 	./scripts/test.sh
+
+include depend.mk
