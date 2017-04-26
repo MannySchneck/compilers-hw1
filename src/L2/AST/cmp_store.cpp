@@ -19,7 +19,7 @@ void Comparison_Store::dump(std::ostream &out) const{
         out << "cmp stor!";
 }
 
-io_set_t Comparison_Store::gen() const{
+io_set_t Comparison_Store::gen(int num_args) const{
         io_set_t gen_st;
 
         return gen_st;

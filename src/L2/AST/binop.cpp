@@ -3,6 +3,7 @@
 #include <ostream>
 #include <L2/AST/regs.h>
 #include <exception>
+#include <iostream>
 
 using namespace L2;
 
@@ -37,7 +38,7 @@ void Binop::dump(std::ostream &out) const{
         out << ")";
 }
 
-io_set_t Binop::gen() const{
+io_set_t Binop::gen(int num_args) const{
         io_set_t gen_st;
 
         if(auto p = dynamic_cast<L2_ID*>(rhs.get())){
@@ -45,7 +46,13 @@ io_set_t Binop::gen() const{
         }
 
         if(auto p = dynamic_cast<L2_ID*>(lhs.get())){
-                gen_st.insert(p->name);
+                switch(op){
+                case(Binop_Op::store):
+                        break;
+                default:
+                        gen_st.insert(p->name);
+                        break;
+                }
         }
         else {
                 throw std::logic_error("WAT. lhs is not an lvalue");
@@ -56,6 +63,17 @@ io_set_t Binop::gen() const{
 
 io_set_t Binop::kill() const{
         io_set_t kill_st;
+
+        if(auto p = dynamic_cast<L2_ID*>(lhs.get())){
+                switch(op){
+                case(Binop_Op::store):
+                        kill_st.insert(p->name);
+                        break;
+                default:
+                        break;
+                }
+        }
+
 
         return kill_st;
 }

@@ -14,7 +14,7 @@ namespace L2{
                 io_set_t in;
                 io_set_t out;
 
-                virtual io_set_t gen() const = 0;
+                virtual io_set_t gen(int num_args) const = 0;
                 virtual io_set_t kill() const = 0;
         protected:
                 Instruction() = default;

@@ -17,7 +17,7 @@ void Goto::dump(std::ostream &out) const{
         out << ")";
 }
 
-io_set_t Goto::gen() const{
+io_set_t Goto::gen(int num_args) const{
         io_set_t gen_st;
 
         return gen_st;

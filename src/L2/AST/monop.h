@@ -15,7 +15,7 @@ namespace L2{
                 Monop(Monop_Op op, compiler_ptr<Writable_Reg> target);
                 void dump(std::ostream &out) const override;
 
-                io_set_t gen() const override;
+                io_set_t gen(int num_args) const override;
                 io_set_t kill() const override;
 
         private:

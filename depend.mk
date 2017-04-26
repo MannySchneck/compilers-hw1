@@ -16,8 +16,9 @@ POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 
-%.o : %.cxx
-%.o : %.cxx $(DEPDIR)/%.d
+%.o : %.cpp
+%.o : %.cpp $(DEPDIR)/%.d
+	$(info runs)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 

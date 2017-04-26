@@ -45,7 +45,7 @@ void Cond_Jump::dump(std::ostream &out) const{
         out << ")";
 }
 
-io_set_t Cond_Jump::gen() const{
+io_set_t Cond_Jump::gen(int num_args) const{
         io_set_t gen_st;
 
         return gen_st;
