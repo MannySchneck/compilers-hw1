@@ -48,6 +48,9 @@ void Cond_Jump::dump(std::ostream &out) const{
 io_set_t Cond_Jump::gen() const{
         io_set_t gen_st;
 
+        insert_name(gen_st, cmp_lhs);
+        insert_name(gen_st, cmp_rhs);
+
         return gen_st;
 }
 

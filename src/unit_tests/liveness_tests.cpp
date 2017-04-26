@@ -32,6 +32,19 @@ TEST_CASE("Correct gen/kill "){
         }
 
 
+        SECTION("binop add from memory"){
+                compiler_ptr<Instruction> store{new Binop(Binop_Op::bit_And_Assign,
+                                                          compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                                          compiler_ptr<Binop_Rhs>{new Memory_Ref(compiler_ptr<Reg>{new Reg{"rbx"}},
+                                                                                                 8)})};
+
+                std::unordered_set<std::string> gen_st{"rbx", "rax"};
+                std::unordered_set<std::string> kill_st{};
+
+                REQUIRE(store->gen() == gen_st);
+                REQUIRE(store->kill() == kill_st);
+        }
+
         SECTION("binop add"){
                 compiler_ptr<Instruction> store{new Binop(Binop_Op::add_Assign,
                                                           compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
@@ -145,5 +158,43 @@ TEST_CASE("Correct gen/kill "){
                 REQUIRE(cmp_str->kill() == kill_st);
         }
 
+        SECTION("cjump "){
+                compiler_ptr<Instruction> cjump(new Cond_Jump(Cmp_Op::equal,
+                                                              compiler_ptr<Value_Source>(new Reg("rax")),
+                                                              compiler_ptr<Value_Source>(new Reg("rbx")),
+                                                                                         L2_Label(":true"),
+                                                                                         L2_Label(":false")));
+
+                std::unordered_set<std::string> gen_st{"rax", "rbx"};
+                std::unordered_set<std::string> kill_st{};
+
+                REQUIRE(cjump->gen() == gen_st);
+                REQUIRE(cjump->kill() == kill_st);
+        }
+
+        SECTION("LEA"){
+                compiler_ptr<Instruction> lea(new LEA(compiler_ptr<Writable>(new Var("blerp")),
+                                                      compiler_ptr<Writable>(new Writable_Reg{"rax"}),
+                                                      compiler_ptr<Writable>(new Var("schmoop")),
+                                                      4));
+
+                std::unordered_set<std::string> gen_st{"rax", "schmoop"};
+                std::unordered_set<std::string> kill_st{"blerp"};
+
+                REQUIRE(lea->gen() == gen_st);
+                REQUIRE(lea->kill() == kill_st);
+
+        }
+
+        SECTION("Monop"){
+                compiler_ptr<Instruction> monop(new Monop(Monop_Op::inc, compiler_ptr<Writable>{new Var{"morp"}}));
+
+                std::unordered_set<std::string> gen_st{"morp"};
+                std::unordered_set<std::string> kill_st{};
+
+                REQUIRE(monop->gen() == gen_st);
+                REQUIRE(monop->kill() == kill_st);
+
+        }
 
 }

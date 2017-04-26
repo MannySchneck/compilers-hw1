@@ -4,7 +4,10 @@
 
 using namespace L2;
 
-LEA::LEA(Writable_Reg target, Writable_Reg base, Writable_Reg offset, int64_t mult) :
+LEA::LEA(compiler_ptr<Writable> target,
+         compiler_ptr<Writable> base,
+         compiler_ptr<Writable> offset,
+         int64_t mult) :
         target(target),
         base(base),
         offset(offset),
@@ -16,17 +19,32 @@ LEA::LEA(Writable_Reg target, Writable_Reg base, Writable_Reg offset, int64_t mu
 }
 
 void LEA::dump(std::ostream &out) const{
-        out << "lea!";
+        out << "(";
+        target->dump(out);
+        out << " ";
+        out << "@";
+        out << " ";
+        base->dump(out);
+        out << " ";
+        offset->dump(out);
+        out << " " << mult;
+        out << ")";
+
 }
 
 io_set_t LEA::gen() const{
         io_set_t gen_st;
+
+        insert_name(gen_st, base);
+        insert_name(gen_st, offset);
 
         return gen_st;
 }
 
 io_set_t LEA::kill() const{
         io_set_t kill_st;
+
+        insert_name(kill_st, target);
 
         return kill_st;
 }

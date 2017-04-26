@@ -1,8 +1,9 @@
 #include <L2/AST/memory_ref.h>
+#include <L2/AST/marker_classes.h>
 
 using namespace L2;
 
-Memory_Ref::Memory_Ref(compiler_ptr<X> base, int64_t offset) :
+Memory_Ref::Memory_Ref(compiler_ptr<Reg> base, int64_t offset) :
         base(std::move(base)),
         offset(offset)
 {
@@ -10,6 +11,10 @@ Memory_Ref::Memory_Ref(compiler_ptr<X> base, int64_t offset) :
                 throw std::invalid_argument("memory ref must be multiple of 8");
         }
 };
+
+compiler_ptr<Reg> Memory_Ref::get_base(){
+        return base;
+}
 
 
 
@@ -19,3 +24,4 @@ void Memory_Ref::dump(std::ostream &out) const{
         out << " " << offset;
         out << ")";
 }
+

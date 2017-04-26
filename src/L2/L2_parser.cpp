@@ -392,14 +392,14 @@ namespace L2 {
 
         struct L2_lea :
                 pegtl::seq<
-                writable_reg,
+                writable,
                 seps,
                 pegtl::if_must<
                         pegtl::string<'@'>,
                         seps,
-                        writable_reg,
+                        writable,
                         seps,
-                        writable_reg,
+                        writable,
                         seps,
                         immediate
                         >
@@ -628,7 +628,7 @@ namespace L2 {
 
         template<> struct action <L2_monop> {
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        auto target = the_stack.downcast_pop<Writable_Reg>();
+                        auto target = the_stack.downcast_pop<Writable>();
 
                         push_instr_curf(p, new Monop(monop_stack.back(),
                                                      std::move(target)));
@@ -733,11 +733,11 @@ namespace L2 {
         template<> struct action<L2_lea>{
                 static void apply( const pegtl::input & in, L2::Program & p){
                         auto mult = the_stack.downcast_pop<Integer_Literal>();
-                        auto offset = the_stack.downcast_pop<Writable_Reg>();
-                        auto base = the_stack.downcast_pop<Writable_Reg>();
-                        auto target = the_stack.downcast_pop<Writable_Reg>();
+                        auto offset = the_stack.downcast_pop<Writable>();
+                        auto base = the_stack.downcast_pop<Writable>();
+                        auto target = the_stack.downcast_pop<Writable>();
 
-                        push_instr_curf(p, new LEA{*target, *base, *offset, mult->value});
+                        push_instr_curf(p, new LEA{target, base, offset, mult->value});
                 }
         };
 
@@ -791,7 +791,7 @@ namespace L2 {
         template<> struct action <L2_mem_ref> {
                 static void apply( const pegtl::input & in, L2::Program & p){
                         auto off = the_stack.downcast_pop<Integer_Literal>();
-                        auto base = the_stack.downcast_pop<X>();
+                        auto base = the_stack.downcast_pop<Reg>();
                         the_stack.push(ASTPtr(new Memory_Ref(std::move(base), off->value)));
                 }
         };

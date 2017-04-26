@@ -41,23 +41,14 @@ void Binop::dump(std::ostream &out) const{
 io_set_t Binop::gen() const{
         io_set_t gen_st;
 
-        if(auto p = dynamic_cast<L2_ID*>(rhs.get())){
-                if(p->name != "rsp"){
-                        gen_st.insert(p->name);
-                }
-        }
+        insert_name(gen_st, rhs);
 
-        if(auto p = dynamic_cast<L2_ID*>(lhs.get())){
-                switch(op){
-                case(Binop_Op::store):
-                        break;
-                default:
-                        gen_st.insert(p->name);
-                        break;
-                }
-        }
-        else {
-                throw std::logic_error("WAT. lhs is not an lvalue");
+        switch(op){
+        case(Binop_Op::store):
+                break;
+        default:
+                insert_name(gen_st, lhs);
+                break;
         }
 
         return gen_st;
@@ -66,14 +57,12 @@ io_set_t Binop::gen() const{
 io_set_t Binop::kill() const{
         io_set_t kill_st;
 
-        if(auto p = dynamic_cast<L2_ID*>(lhs.get())){
-                switch(op){
-                case(Binop_Op::store):
-                        kill_st.insert(p->name);
-                        break;
-                default:
-                        break;
-                }
+        switch(op){
+        case(Binop_Op::store):
+                insert_name(kill_st, lhs);
+                break;
+        default:
+                break;
         }
 
 

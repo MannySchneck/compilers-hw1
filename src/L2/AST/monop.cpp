@@ -1,8 +1,9 @@
 #include <L2/AST/monop.h>
+#include <iostream>
 
 using namespace L2;
 
-Monop::Monop(Monop_Op op, compiler_ptr<Writable_Reg> target) :
+Monop::Monop(Monop_Op op, compiler_ptr<Writable> target) :
         op(op),
         target(std::move(target)){};
 
@@ -24,6 +25,8 @@ void Monop::dump(std::ostream &out) const{
 
 io_set_t Monop::gen() const{
         io_set_t gen_st;
+
+        insert_name(gen_st, target);
 
         return gen_st;
 }

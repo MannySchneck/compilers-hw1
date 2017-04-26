@@ -12,7 +12,7 @@ namespace L2{
 
         class Monop : public Instruction{
         public:
-                Monop(Monop_Op op, compiler_ptr<Writable_Reg> target);
+                Monop(Monop_Op op, compiler_ptr<Writable> target);
                 void dump(std::ostream &out) const override;
 
                 io_set_t gen() const override;
@@ -20,7 +20,7 @@ namespace L2{
 
         private:
                 Monop_Op  op;
-                compiler_ptr<Writable_Reg> target;
+                compiler_ptr<Writable> target;
         };
 
 }

@@ -8,7 +8,6 @@
 namespace L2{
         class Reg :
                 public virtual Value_Source,
-                public X,
                 public L2_ID
         {
         public:

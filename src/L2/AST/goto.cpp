@@ -28,3 +28,5 @@ io_set_t Goto::kill() const{
 
         return kill_st;
 }
+
+// no computed goto

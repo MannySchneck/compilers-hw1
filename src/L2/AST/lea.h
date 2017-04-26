@@ -7,9 +7,9 @@ namespace L2 {
 
         class LEA : public Instruction{
         public:
-                LEA(Writable_Reg target,
-                    Writable_Reg base,
-                    Writable_Reg offset,
+                LEA(compiler_ptr<Writable> target,
+                    compiler_ptr<Writable> base,
+                    compiler_ptr<Writable> offset,
                     int64_t mult);
 
                 void dump(std::ostream &out) const override;
@@ -17,10 +17,10 @@ namespace L2 {
                 io_set_t gen() const override;
                 io_set_t kill() const override;
         private:
-                Writable_Reg target;
-                Writable_Reg base;
+                compiler_ptr<Writable> target;
+                compiler_ptr<Writable> base;
 
-                Writable_Reg offset;
+                compiler_ptr<Writable> offset;
                 int64_t mult; // 0 | 2 | 4 | 8
         };
 
