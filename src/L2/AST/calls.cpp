@@ -9,8 +9,10 @@ Call::Call(compiler_ptr<Callable> fun, int64_t numargs) :
         fun(std::move(fun)),
         numargs(numargs){}
 
-Runtime_Call::Runtime_Call(Runtime_Fun fun) :
-        fun(fun){}
+Runtime_Call::Runtime_Call(Runtime_Fun fun, int64_t numargs) :
+        fun(fun),
+        numargs(numargs){
+}
 
 
 
@@ -43,7 +45,7 @@ void Runtime_Call::dump(std::ostream &out) const{
 }
 
 
-io_set_t Call::gen(int num_args) const{
+io_set_t Call::gen() const{
         io_set_t gen_st;
 
         if(dynamic_cast<L2_Label*>(fun.get())){
@@ -53,7 +55,9 @@ io_set_t Call::gen(int num_args) const{
                 gen_st.insert(p->name);
         }
 
-        //for(auto reg : Lang_)
+        for(int i = 0; i < numargs; i++){
+                gen_st.insert(Lang_Constants::arg_regs[i]);
+        }
 
         return gen_st;
 }
@@ -61,17 +65,29 @@ io_set_t Call::gen(int num_args) const{
 io_set_t Call::kill() const{
         io_set_t kill_st;
 
+        for(auto reg : Lang_Constants::caller_saves){
+                kill_st.insert(reg);
+        }
+
         return kill_st;
 }
 
-io_set_t Runtime_Call::gen(int num_args) const{
+io_set_t Runtime_Call::gen() const{
         io_set_t gen_st;
+
+        for(int i = 0; i < numargs; i++){
+                 gen_st.insert(Lang_Constants::arg_regs[i]);
+        }
 
         return gen_st;
 }
 
 io_set_t Runtime_Call::kill() const{
         io_set_t kill_st;
+
+        for(auto reg : Lang_Constants::caller_saves){
+                kill_st.insert(reg);
+        }
 
         return kill_st;
 }

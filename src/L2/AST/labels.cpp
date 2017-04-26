@@ -26,7 +26,7 @@ void L2_Target_Label::dump(std::ostream &out) const{
 }
 
 
-io_set_t L2_Label::gen(int num_args) const{
+io_set_t L2_Label::gen() const{
         io_set_t gen_st;
 
         return gen_st;

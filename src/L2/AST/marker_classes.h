@@ -7,6 +7,8 @@
 
 namespace L2{
 
+        class L2_ID;
+
         using io_set_t = std::unordered_set<std::string>;
 
         class Instruction : public virtual AST_Item{
@@ -14,8 +16,10 @@ namespace L2{
                 io_set_t in;
                 io_set_t out;
 
-                virtual io_set_t gen(int num_args) const = 0;
+                virtual io_set_t gen() const = 0;
                 virtual io_set_t kill() const = 0;
+
+                void insert_name(io_set_t &io_set, const compiler_ptr<AST_Item> &id) const;
         protected:
                 Instruction() = default;
         };
@@ -48,23 +52,25 @@ namespace L2{
         class X:
                 public virtual AST_Item{};
 
+        // t
+        class Value_Source : public virtual Source{
+        protected:
+                Value_Source() {};
+        };
+
+
         //w
         class Writable :
                 public virtual AST_Item,
                 public Callable,
                 public Binop_Lhs,
+                public virtual Value_Source,
                 public virtual Binop_Rhs
         {
         protected:
                 Writable(){};
         };
 
-
-        // t
-        class Value_Source : public virtual Source{
-        protected:
-                Value_Source() {};
-        };
 
         class L2_ID : public virtual AST_Item {
         public:

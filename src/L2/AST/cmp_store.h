@@ -13,11 +13,11 @@ namespace L2{
                 Comparison_Store(Cmp_Op op,
                                  compiler_ptr<Value_Source> lhs,
                                  compiler_ptr<Value_Source> rhs,
-                                 Writable_Reg target);
+                                 compiler_ptr<Writable> target);
 
                 void dump(std::ostream &out) const override;
 
-                io_set_t gen(int num_args) const override;
+                io_set_t gen() const override;
                 io_set_t kill() const override;
 
 
@@ -31,7 +31,7 @@ namespace L2{
                 void output_mov(Writable_Reg target, int val, std::ostream& out) const;
 
                 Cmp_Op op;
-                Writable_Reg target;
+                compiler_ptr<Writable> target;
                 compiler_ptr<Value_Source> lhs;
                 compiler_ptr<Value_Source> rhs;
         };

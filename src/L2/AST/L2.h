@@ -10,6 +10,8 @@
 #include <exception>
 #include <unordered_map>
 
+#include <L2/AST/lang_constants.h>
+
 #include <L2/AST/ast_item.h>
 #include <L2/AST/translatable.h>
 #include <L2/AST/marker_classes.h>

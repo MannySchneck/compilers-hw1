@@ -19,7 +19,7 @@ void LEA::dump(std::ostream &out) const{
         out << "lea!";
 }
 
-io_set_t LEA::gen(int num_args) const{
+io_set_t LEA::gen() const{
         io_set_t gen_st;
 
         return gen_st;

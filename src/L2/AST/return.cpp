@@ -12,7 +12,7 @@ void Return::dump(std::ostream &out) const{
         out << "(return)";
 }
 
-io_set_t Return::gen(int num_args) const{
+io_set_t Return::gen() const{
         io_set_t gen_st;
 
         return gen_st;

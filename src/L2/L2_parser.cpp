@@ -388,7 +388,7 @@ namespace L2 {
                 seps,
                 runtime_fun,
                 seps,
-                number>{};
+                immediate>{};
 
         struct L2_lea :
                 pegtl::seq<
@@ -687,11 +687,11 @@ namespace L2 {
                 static void apply( const pegtl::input & in, L2::Program & p){
                         auto rhs = the_stack.downcast_pop<Value_Source>();
                         auto lhs = the_stack.downcast_pop<Value_Source>();
-                        auto target = the_stack.downcast_pop<Writable_Reg>();
+                        auto target = the_stack.downcast_pop<Writable>();
                         push_instr_curf(p, new Comparison_Store(cmp_stack.back(),
                                                                 std::move(lhs),
                                                                 std::move(rhs),
-                                                                *target));
+                                                                target));
                         cmp_stack.pop_back();
                 }
         };
@@ -724,7 +724,8 @@ namespace L2 {
 
         template<> struct action<L2_rt_call>{
                 static void apply( const pegtl::input & in, L2::Program & p){
-                        push_instr_curf(p, new Runtime_Call(rf_stack.back()));
+                        auto numargs = the_stack.downcast_pop<Integer_Literal>();
+                        push_instr_curf(p, new Runtime_Call(rf_stack.back(), numargs->value));
                         rf_stack.pop_back();
                 }
         };

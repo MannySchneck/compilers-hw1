@@ -3,5 +3,6 @@
 (myVar1 <- 5)
 (myVar2 <- 0)
 (myVar2 += myVar1)
+(myVar3 <- rdi < myvar4)
 (return)
 )

@@ -14,7 +14,7 @@ namespace L2 {
 
                 void dump(std::ostream &out) const override;
 
-                io_set_t gen(int num_args) const override;
+                io_set_t gen() const override;
                 io_set_t kill() const override;
         private:
                 Writable_Reg target;

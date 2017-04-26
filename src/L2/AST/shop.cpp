@@ -24,7 +24,7 @@ void Shop::dump(std::ostream &out) const{
         out << ")";
 }
 
-io_set_t Shop::gen(int num_args) const{
+io_set_t Shop::gen() const{
         io_set_t gen_st;
 
         return gen_st;

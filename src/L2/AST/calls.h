@@ -12,14 +12,15 @@ namespace L2 {
 
         class Runtime_Call : public Instruction{
         public:
-                Runtime_Call(Runtime_Fun fun);
+                Runtime_Call(Runtime_Fun fun, int64_t numargs);
                 void dump(std::ostream &out) const override;
 
-                io_set_t gen(int num_args) const override;
+                io_set_t gen() const override;
                 io_set_t kill() const override;
 
         private:
                 Runtime_Fun fun;
+                int64_t numargs;
         };
 
         class Call : public Instruction{
@@ -28,14 +29,12 @@ namespace L2 {
 
                 void dump(std::ostream &out) const override;
 
-                io_set_t gen(int num_args) const override;
+                io_set_t gen() const override;
                 io_set_t kill() const override;
 
         private:
                 compiler_ptr<Callable> fun;
                 int64_t numargs;
         };
-
-
 
 }  // L2

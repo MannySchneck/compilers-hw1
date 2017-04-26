@@ -7,4 +7,5 @@ void L2::output_comparison(Translatable* lhs,
         rhs->translate(out);
         out << ", ";
         lhs->translate(out);
+
 }

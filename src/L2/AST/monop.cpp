@@ -22,7 +22,7 @@ void Monop::dump(std::ostream &out) const{
 }
 
 
-io_set_t Monop::gen(int num_args) const{
+io_set_t Monop::gen() const{
         io_set_t gen_st;
 
         return gen_st;
