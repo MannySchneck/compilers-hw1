@@ -44,3 +44,7 @@ void Function::dump(std::ostream &out) const{
 
         out << ")" << std::endl;
 }
+
+std::vector<io_set_t> Function::make_liveness_set() const {
+        return std::vector<io_set_t>{};
+}

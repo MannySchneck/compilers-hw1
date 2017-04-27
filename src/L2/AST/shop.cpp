@@ -4,7 +4,7 @@
 
 using namespace L2;
 
-Shop::Shop(Shop_Op op, compiler_ptr<Writable_Reg> lhs, compiler_ptr<Value_Source> rhs):
+Shop::Shop(Shop_Op op, compiler_ptr<Writable> lhs, compiler_ptr<Value_Source> rhs):
         op(op),
         lhs(std::move(lhs)),
         rhs(std::move(rhs)){}
@@ -26,6 +26,9 @@ void Shop::dump(std::ostream &out) const{
 
 io_set_t Shop::gen() const{
         io_set_t gen_st;
+
+        insert_name(gen_st, lhs);
+        insert_name(gen_st, rhs);
 
         return gen_st;
 }

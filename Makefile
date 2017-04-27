@@ -40,14 +40,14 @@ L2_CPP_FILES := $(wildcard $(L2_SRC_DIR)/*.cpp)
 L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/*.cpp)
 L2_HDR_FILES := $(L2_CPP_FILES:%.cpp=%.h)
 
-L2_MAIN_OBJ := $(addprefix $(L2_OBJ_DIR),$(notdir $(L2_MAIN_CPP:.cpp=.o)))
+L2_MAIN_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_MAIN_CPP:src/%.cpp=%.o))
 L2_OBJ_FILES := $(addprefix $(L2_OBJ_DIR),$(L2_CPP_FILES:src/%.cpp=%.o))
 #tests
 UNIT_TEST_SRC_DIR := src/unit_tests
 UNIT_TEST_CPP_FILES := $(wildcard $(UNIT_TEST_SRC_DIR)/*.cpp)
 UNIT_TEST_MAIN := $(UNIT_TEST_SRC_DIR)/main/catch_main.cpp
 
-SRC_DIRS += $(UNIT_TEST_SRC_DIR)
+SRC_DIRS += $(UNIT_TEST_SRC_DIR) $(L2_SRC_DIR)/main
 
 OBJ_DIRS := $(SRC_DIRS:src/%=obj/%)
 DEP_DIRS := $(SRC_DIRS:src/%=$(DEPDIR)/%)
@@ -103,7 +103,7 @@ L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
 
 L2_test: L2
-	./scripts/test.sh
+	./scripts/L2_test.sh
 
 ################################################################################
 # Dependencies

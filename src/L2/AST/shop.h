@@ -16,7 +16,7 @@ namespace L2{
         {
         public:
                 Shop(Shop_Op,
-                     compiler_ptr<Writable_Reg>,
+                     compiler_ptr<Writable>,
                      compiler_ptr<Value_Source>);
 
                 void dump(std::ostream &out) const override;
@@ -26,7 +26,7 @@ namespace L2{
 
         private:
                 Shop_Op op;
-                compiler_ptr<Writable_Reg> lhs;
+                compiler_ptr<Writable> lhs;
                 compiler_ptr<Value_Source> rhs;
         };
 }

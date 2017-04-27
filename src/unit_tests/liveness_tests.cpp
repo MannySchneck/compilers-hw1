@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <L2/AST/L2.h>
+#include <L2/AST/lang_constants.h>
 #include <unordered_set>
 #include <string>
 
@@ -162,8 +163,8 @@ TEST_CASE("Correct gen/kill "){
                 compiler_ptr<Instruction> cjump(new Cond_Jump(Cmp_Op::equal,
                                                               compiler_ptr<Value_Source>(new Reg("rax")),
                                                               compiler_ptr<Value_Source>(new Reg("rbx")),
-                                                                                         L2_Label(":true"),
-                                                                                         L2_Label(":false")));
+                                                              L2_Label(":true"),
+                                                              L2_Label(":false")));
 
                 std::unordered_set<std::string> gen_st{"rax", "rbx"};
                 std::unordered_set<std::string> kill_st{};
@@ -195,6 +196,45 @@ TEST_CASE("Correct gen/kill "){
                 REQUIRE(monop->gen() == gen_st);
                 REQUIRE(monop->kill() == kill_st);
 
+        }
+
+        SECTION("return"){
+                compiler_ptr<Instruction> ret(new Return{8});
+
+                std::unordered_set<std::string> gen_st{};
+                std::unordered_set<std::string> kill_st{};
+
+                for(auto reg : Lang_Constants::caller_saves){
+                        gen_st.insert(reg);
+                }
+                gen_st.insert("rax");
+
+                REQUIRE(ret->gen() == gen_st);
+                REQUIRE(ret->kill() == kill_st);
+        }
+
+        SECTION("shop"){
+                compiler_ptr<Instruction> shop(new Shop{Shop_Op::left_Shift,
+                                        compiler_ptr<Writable>{new Writable_Reg{"rax"}},
+                                        compiler_ptr<Value_Source>{new Var{"mlorp"}}});
+
+                std::unordered_set<std::string> gen_st{"rax", "mlorp"};
+                std::unordered_set<std::string> kill_st{};
+
+                REQUIRE(shop->gen() == gen_st);
+                REQUIRE(shop->kill() == kill_st);
+        }
+
+        SECTION("const shop"){
+                compiler_ptr<Instruction> shop(new Shop{Shop_Op::left_Shift,
+                                        compiler_ptr<Writable>{new Writable_Reg{"rax"}},
+                                        compiler_ptr<Value_Source>{new Integer_Literal{"7"}}});
+
+                std::unordered_set<std::string> gen_st{"rax"};
+                std::unordered_set<std::string> kill_st{};
+
+                REQUIRE(shop->gen() == gen_st);
+                REQUIRE(shop->kill() == kill_st);
         }
 
 }

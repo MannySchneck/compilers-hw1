@@ -2,7 +2,7 @@
 
 passed=0 ;
 failed=0 ;
-cd tests/liveness ; 
+cd tests/liveness ;
 for i in *.L2f ; do
 
   # If the output already exists, skip the current test
@@ -23,7 +23,7 @@ for i in *.L2f ; do
     echo "  Passed" ;
     let passed=$passed+1 ;
   fi
-  popd ; 
+  popd ;
 done
 let total=$passed+$failed ;
 

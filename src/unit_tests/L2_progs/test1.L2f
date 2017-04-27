@@ -5,6 +5,8 @@
 (myVar2 += myVar1)
 (myVar3 <- rdi < myvar4)
 (r10 @ rax hi 4)
+(r13 <<= rcx)
+(blarp <<= rcx)
 (rax++)
 (return)
 )

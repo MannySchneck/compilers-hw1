@@ -1,4 +1,5 @@
 #include <L2/AST/return.h>
+#include <L2/AST/lang_constants.h>
 
 using namespace L2;
 
@@ -15,6 +16,11 @@ void Return::dump(std::ostream &out) const{
 io_set_t Return::gen() const{
         io_set_t gen_st;
 
+        for(auto reg : Lang_Constants::caller_saves){
+                gen_st.insert(reg);
+        }
+
+        gen_st.insert("rax");
         return gen_st;
 }
 

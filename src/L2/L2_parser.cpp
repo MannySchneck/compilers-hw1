@@ -605,7 +605,7 @@ namespace L2 {
         template<> struct action <L2_sop> {
                 static void apply( const pegtl::input & in, L2::Program & p){
                         auto shift = the_stack.downcast_pop<Value_Source>();
-                        auto target = the_stack.downcast_pop<Writable_Reg>();
+                        auto target = the_stack.downcast_pop<Writable>();
 
                         push_instr_curf(p, new Shop(shop_stack.back(),
                                                     std::move(target),

@@ -1,6 +1,7 @@
 #pragma once
 #include <L2/AST/translatable.h>
 #include <L2/AST/labels.h>
+#include <L2/AST/marker_classes.h>
 #include <vector>
 
 namespace L2{
@@ -10,6 +11,8 @@ namespace L2{
                 Function() = default;
                 Function(L2_Target_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
+
+                std::vector<io_set_t> make_liveness_set() const;
 
                 void dump(std::ostream &out) const override;
 
