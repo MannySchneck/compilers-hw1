@@ -2,7 +2,7 @@
 #include <L2/AST/marker_classes.h>
 #include <memory>
 #include <string>
-#include <unordered_set>
+#include <set>
 
 namespace L2 {
 

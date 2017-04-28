@@ -1,7 +1,7 @@
 #pragma once
 
 #include <L2/AST/translatable.h>
-#include <unordered_set>
+#include <set>
 #include <string>
 #include <vector>
 #include <ostream>
@@ -11,7 +11,7 @@ namespace L2{
 
         class L2_ID;
 
-        using io_set_t = std::unordered_set<std::string>;
+        using io_set_t = std::set<std::string>;
 
         using liveness_sets_t =  std::pair<std::vector<L2::io_set_t>,
                                            std::vector<L2::io_set_t>>;

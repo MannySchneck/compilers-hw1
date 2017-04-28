@@ -1,5 +1,5 @@
 #include <L2/AST/lea.h>
-#include <unordered_set>
+#include <set>
 #include <string>
 
 using namespace L2;

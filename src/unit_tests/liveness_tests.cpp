@@ -1,7 +1,7 @@
 #include <catch.hpp>
 #include <L2/AST/L2.h>
 #include <L2/AST/lang_constants.h>
-#include <unordered_set>
+#include <set>
 #include <string>
 #include <prettyprint.hpp>
 #include <L2/AST/marker_classes.h>
@@ -16,8 +16,8 @@ TEST_CASE("Correct gen/kill "){
                                                           compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
                                                           compiler_ptr<Binop_Rhs>{new Writable_Reg("rbx")})};
 
-                std::unordered_set<std::string> gen_st{"rbx"};
-                std::unordered_set<std::string> kill_st{"rax"};
+                std::set<std::string> gen_st{"rbx"};
+                std::set<std::string> kill_st{"rax"};
 
                 REQUIRE(store->gen() == gen_st);
                 REQUIRE(store->kill() == kill_st);
@@ -28,8 +28,8 @@ TEST_CASE("Correct gen/kill "){
                                                           compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
                                                           compiler_ptr<Binop_Rhs>{new Integer_Literal("4")})};
 
-                std::unordered_set<std::string> gen_st{};
-                std::unordered_set<std::string> kill_st{"rax"};
+                std::set<std::string> gen_st{};
+                std::set<std::string> kill_st{"rax"};
 
                 REQUIRE(store->gen() == gen_st);
                 REQUIRE(store->kill() == kill_st);
@@ -42,8 +42,8 @@ TEST_CASE("Correct gen/kill "){
                                                           compiler_ptr<Binop_Rhs>{new Memory_Ref(compiler_ptr<Reg>{new Reg{"rbx"}},
                                                                                                  8)})};
 
-                std::unordered_set<std::string> gen_st{"rbx", "rax"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"rbx", "rax"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(store->gen() == gen_st);
                 REQUIRE(store->kill() == kill_st);
@@ -54,8 +54,8 @@ TEST_CASE("Correct gen/kill "){
                                                           compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
                                                           compiler_ptr<Binop_Rhs>{new Writable_Reg("rbx")})};
 
-                std::unordered_set<std::string> gen_st{"rbx", "rax"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"rbx", "rax"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(store->gen() == gen_st);
                 REQUIRE(store->kill() == kill_st);
@@ -66,15 +66,15 @@ TEST_CASE("Correct gen/kill "){
                                                           compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
                                                           compiler_ptr<Binop_Rhs>{new Integer_Literal("4")})};
 
-                std::unordered_set<std::string> gen_st{"rax"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"rax"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(store->gen() == gen_st);
                 REQUIRE(store->kill() == kill_st);
         }
 
         SECTION("Call"){
-                std::unordered_set<std::string> caller_saves;
+                std::set<std::string> caller_saves;
 
                 for(auto reg : Lang_Constants::caller_saves){
                         caller_saves.insert(reg);
@@ -82,8 +82,8 @@ TEST_CASE("Correct gen/kill "){
 
                 compiler_ptr<Instruction> call{new Call{compiler_ptr<Callable>{new Writable_Reg("rax")}, 4}};
 
-                std::unordered_set<std::string> gen_st{"rax", "rdi", "rsi", "rcx", "rdx"};
-                std::unordered_set<std::string> kill_st = caller_saves;
+                std::set<std::string> gen_st{"rax", "rdi", "rsi", "rcx", "rdx"};
+                std::set<std::string> kill_st = caller_saves;
 
                 REQUIRE(call->gen() == gen_st);
                 REQUIRE(call->kill() == kill_st);
@@ -91,7 +91,7 @@ TEST_CASE("Correct gen/kill "){
         }
 
         SECTION("Call with label"){
-                std::unordered_set<std::string> caller_saves;
+                std::set<std::string> caller_saves;
 
                 for(auto reg : Lang_Constants::caller_saves){
                         caller_saves.insert(reg);
@@ -99,8 +99,8 @@ TEST_CASE("Correct gen/kill "){
 
                 compiler_ptr<Instruction> call{new Call{compiler_ptr<Callable>{new L2_Label("rax")}, 4}};
 
-                std::unordered_set<std::string> gen_st{"rdi", "rsi", "rcx", "rdx"};
-                std::unordered_set<std::string> kill_st = caller_saves;
+                std::set<std::string> gen_st{"rdi", "rsi", "rcx", "rdx"};
+                std::set<std::string> kill_st = caller_saves;
 
                 REQUIRE(call->gen() == gen_st);
                 REQUIRE(call->kill() == kill_st);
@@ -108,7 +108,7 @@ TEST_CASE("Correct gen/kill "){
         }
 
         SECTION("runtime call"){
-                std::unordered_set<std::string> caller_saves;
+                std::set<std::string> caller_saves;
 
                 for(auto reg : Lang_Constants::caller_saves){
                         caller_saves.insert(reg);
@@ -116,8 +116,8 @@ TEST_CASE("Correct gen/kill "){
 
                 compiler_ptr<Instruction> call{new Runtime_Call{Runtime_Fun::print, 1}};
 
-                std::unordered_set<std::string> gen_st{"rdi"};
-                std::unordered_set<std::string> kill_st = caller_saves;
+                std::set<std::string> gen_st{"rdi"};
+                std::set<std::string> kill_st = caller_saves;
 
                 REQUIRE(call->gen() == gen_st);
                 REQUIRE(call->kill() == kill_st);
@@ -130,8 +130,8 @@ TEST_CASE("Correct gen/kill "){
                                         compiler_ptr<Value_Source>{new Reg{"rax"}},
                                                 compiler_ptr<Writable>{new Var{"blerp"}}}};
 
-                std::unordered_set<std::string> gen_st{"rax"};
-                std::unordered_set<std::string> kill_st{"blerp"};
+                std::set<std::string> gen_st{"rax"};
+                std::set<std::string> kill_st{"blerp"};
 
                 REQUIRE(cmp_str->gen() == gen_st);
                 REQUIRE(cmp_str->kill() == kill_st);
@@ -143,8 +143,8 @@ TEST_CASE("Correct gen/kill "){
                                         compiler_ptr<Value_Source>{new Var{"raxy"}},
                                                 compiler_ptr<Writable>{new Var{"blerp"}}}};
 
-                std::unordered_set<std::string> gen_st{"raxy", "rspy"};
-                std::unordered_set<std::string> kill_st{"blerp"};
+                std::set<std::string> gen_st{"raxy", "rspy"};
+                std::set<std::string> kill_st{"blerp"};
 
                 REQUIRE(cmp_str->gen() == gen_st);
                 REQUIRE(cmp_str->kill() == kill_st);
@@ -155,8 +155,8 @@ TEST_CASE("Correct gen/kill "){
                                         compiler_ptr<Value_Source>{new Integer_Literal{"5"}},
                                                 compiler_ptr<Writable>{new Var{"blerp"}}}};
 
-                std::unordered_set<std::string> gen_st{};
-                std::unordered_set<std::string> kill_st{"blerp"};
+                std::set<std::string> gen_st{};
+                std::set<std::string> kill_st{"blerp"};
 
                 REQUIRE(cmp_str->gen() == gen_st);
                 REQUIRE(cmp_str->kill() == kill_st);
@@ -169,8 +169,8 @@ TEST_CASE("Correct gen/kill "){
                                                               L2_Label(":true"),
                                                               L2_Label(":false")));
 
-                std::unordered_set<std::string> gen_st{"rax", "rbx"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"rax", "rbx"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(cjump->gen() == gen_st);
                 REQUIRE(cjump->kill() == kill_st);
@@ -182,8 +182,8 @@ TEST_CASE("Correct gen/kill "){
                                                       compiler_ptr<Writable>(new Var("schmoop")),
                                                       4));
 
-                std::unordered_set<std::string> gen_st{"rax", "schmoop"};
-                std::unordered_set<std::string> kill_st{"blerp"};
+                std::set<std::string> gen_st{"rax", "schmoop"};
+                std::set<std::string> kill_st{"blerp"};
 
                 REQUIRE(lea->gen() == gen_st);
                 REQUIRE(lea->kill() == kill_st);
@@ -193,8 +193,8 @@ TEST_CASE("Correct gen/kill "){
         SECTION("Monop"){
                 compiler_ptr<Instruction> monop(new Monop(Monop_Op::inc, compiler_ptr<Writable>{new Var{"morp"}}));
 
-                std::unordered_set<std::string> gen_st{"morp"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"morp"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(monop->gen() == gen_st);
                 REQUIRE(monop->kill() == kill_st);
@@ -204,8 +204,8 @@ TEST_CASE("Correct gen/kill "){
         SECTION("return"){
                 compiler_ptr<Instruction> ret(new Return{8});
 
-                std::unordered_set<std::string> gen_st{};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{};
+                std::set<std::string> kill_st{};
 
                 for(auto reg : Lang_Constants::caller_saves){
                         gen_st.insert(reg);
@@ -221,8 +221,8 @@ TEST_CASE("Correct gen/kill "){
                                         compiler_ptr<Writable>{new Writable_Reg{"rax"}},
                                         compiler_ptr<Value_Source>{new Var{"mlorp"}}});
 
-                std::unordered_set<std::string> gen_st{"rax", "mlorp"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"rax", "mlorp"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(shop->gen() == gen_st);
                 REQUIRE(shop->kill() == kill_st);
@@ -233,8 +233,8 @@ TEST_CASE("Correct gen/kill "){
                                         compiler_ptr<Writable>{new Writable_Reg{"rax"}},
                                         compiler_ptr<Value_Source>{new Integer_Literal{"7"}}});
 
-                std::unordered_set<std::string> gen_st{"rax"};
-                std::unordered_set<std::string> kill_st{};
+                std::set<std::string> gen_st{"rax"};
+                std::set<std::string> kill_st{};
 
                 REQUIRE(shop->gen() == gen_st);
                 REQUIRE(shop->kill() == kill_st);

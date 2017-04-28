@@ -58,7 +58,7 @@ std::vector<Inst_Posn> Function::find_successors(Inst_Posn pos){
 }
 
 liveness_sets_t Function::make_liveness_set() const {
-        std::unordered_set<int> dirty;
+        std::set<int> dirty;
 
         return liveness_sets_t{};
 }
