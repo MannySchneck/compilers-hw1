@@ -324,3 +324,52 @@ TEST_CASE("Successor funciton"){
         }
 
 }
+
+TEST_CASE("Liveness calculation"){
+        Function f{L2_Target_Label{"hi"}, 0, 0};
+
+        compiler_ptr<Instruction> store{new Binop(Binop_Op::store,
+                                                  compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                                  compiler_ptr<Binop_Rhs>{new Writable_Reg("rcx")})};
+
+        compiler_ptr<Instruction> store2{new Binop(Binop_Op::store,
+                                                   compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                                   compiler_ptr<Binop_Rhs>{new Writable_Reg("rbx")})};
+
+        compiler_ptr<Instruction> shop(new Shop{Shop_Op::left_Shift,
+                                compiler_ptr<Writable>{new Writable_Reg{"rax"}},
+                                compiler_ptr<Value_Source>{new Integer_Literal{"7"}}});
+
+        compiler_ptr<Instruction> jump(new Goto{":mlarp"});
+
+        compiler_ptr<Instruction> targ(new L2_Target_Label{":mlarp"});
+
+        compiler_ptr<Instruction> t_targ(new L2_Target_Label{":true"});
+        compiler_ptr<Instruction> f_targ(new L2_Target_Label{":false"});
+        compiler_ptr<Instruction> cjump(new Cond_Jump(Cmp_Op::equal,
+                                                      compiler_ptr<Value_Source>{new Var{"hi"}},
+                                                      compiler_ptr<Value_Source>{new Reg{"mlarp"}},
+                                                      L2_Label{":true"},
+                                                      L2_Label{":false"}));
+
+        compiler_ptr<Instruction> ret(new Return(0));
+
+        SECTION("Store"){
+                f.instructions.push_back(store);
+                f.instructions.push_back(ret);
+
+                liveness_sets_t result = {
+                        {//in
+                                {"rcx", "r12", "r13", "r14", "r15", "rbp", "rbx"},
+                                {"rax", "r12", "r13", "r14", "r15", "rbp", "rbx"}
+                        },
+
+                        {//out
+                                {"rax", "r12", "r13", "r14", "r15", "rbp", "rbx"},
+                                {}
+                        }
+                };
+
+                REQUIRE(f.make_liveness_set() == result);
+        }
+}

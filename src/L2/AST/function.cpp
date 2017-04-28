@@ -3,6 +3,7 @@
 #include <L2/AST/cond_jump.h>
 #include <vector>
 #include <iterator>
+#include <numeric>
 
 using namespace L2;
 
@@ -15,7 +16,6 @@ Function::Function(L2_Target_Label name, int64_t args, int64_t locals) :
 int64_t Function::stack_args() const{
         return arguments < 6 ? 0 : arguments - 6;
 }
-
 
 int64_t Function::stack_shift() const{
         return 8 * (locals  + stack_args());
@@ -58,7 +58,15 @@ std::vector<Inst_Posn> Function::find_successors(Inst_Posn pos){
 }
 
 liveness_sets_t Function::make_liveness_set() const {
-        std::set<int> dirty;
+        bool dirty{false};
+
+        do {
+                for(auto inst_it = instructions.rbegin();
+                    inst_it != instructions.rend();
+                    inst_it++){
+                        //dirty = (*inst_it)->populate_liveness_sets(instructions);
+                }
+        } while(dirty);
 
         return liveness_sets_t{};
 }
