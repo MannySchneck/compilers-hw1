@@ -1,6 +1,7 @@
 #pragma once
 
 #include <L2/AST/marker_classes.h>
+#include <L2/AST/instruction.h>
 
 namespace L2{
         class Var : public Writable,

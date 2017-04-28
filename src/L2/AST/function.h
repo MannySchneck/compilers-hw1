@@ -2,6 +2,7 @@
 #include <L2/AST/translatable.h>
 #include <L2/AST/labels.h>
 #include <L2/AST/marker_classes.h>
+#include <L2/AST/instruction.h>
 #include <vector>
 
 namespace L2{

@@ -2,6 +2,7 @@
 
 #include <L2/AST/translatable.h>
 #include <L2/AST/marker_classes.h>
+#include <L2/AST/instruction.h>
 
 namespace L2{
         class Integer_Literal :

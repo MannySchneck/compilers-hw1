@@ -1,5 +1,6 @@
 #include <L2/AST/memory_ref.h>
 #include <L2/AST/marker_classes.h>
+#include <L2/AST/instruction.h>
 
 using namespace L2;
 
