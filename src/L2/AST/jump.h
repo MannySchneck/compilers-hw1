@@ -8,7 +8,7 @@ using namespace L2;
 
 class Jump{
 public:
-        Inst_Posn find_target(std::vector<Inst_Ptr>::const_iterator begin,
-                              std::vector<Inst_Ptr>::const_iterator end,
-                              const L2_Label &lab) const;
+        Inst_Posn find_target(std::vector<Inst_Ptr>::iterator begin,
+                              std::vector<Inst_Ptr>::iterator end,
+                              const L2_Label &lab);
 };

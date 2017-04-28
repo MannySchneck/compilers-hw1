@@ -207,7 +207,7 @@ TEST_CASE("Correct gen/kill "){
                 std::set<std::string> gen_st{};
                 std::set<std::string> kill_st{};
 
-                for(auto reg : Lang_Constants::caller_saves){
+                for(auto reg : Lang_Constants::callee_saves){
                         gen_st.insert(reg);
                 }
                 gen_st.insert("rax");
@@ -370,6 +370,8 @@ TEST_CASE("Liveness calculation"){
                         }
                 };
 
-                REQUIRE(f.make_liveness_set() == result);
+                f.populate_liveness_sets();
+
+                REQUIRE(f.make_liveness_sets() == result);
         }
 }

@@ -57,16 +57,34 @@ std::vector<Inst_Posn> Function::find_successors(Inst_Posn pos){
         return (*pos)->find_successors(pos, instructions);
 }
 
-liveness_sets_t Function::make_liveness_set() const {
-        bool dirty{false};
+template <typename T>
+class TD;
 
+void Function::populate_liveness_sets(){
+
+        bool dirty{false};
         do {
-                for(auto inst_it = instructions.rbegin();
-                    inst_it != instructions.rend();
-                    inst_it++){
-                        //dirty = (*inst_it)->populate_liveness_sets(instructions);
+                dirty = false;
+                for(auto inst_it = instructions.end() - 1;
+                    inst_it != instructions.begin() - 1;
+                    inst_it--){
+                        dirty = dirty || (*inst_it)->one_iteration_calc_io_sets(inst_it,
+                                                                                instructions);
                 }
         } while(dirty);
-
-        return liveness_sets_t{};
 }
+
+liveness_sets_t Function::make_liveness_sets(){
+        std::vector<io_set_t> in_sets;
+        std::vector<io_set_t> out_sets;
+
+        for(auto inst : instructions){
+                in_sets.push_back(inst->in);
+                out_sets.push_back(inst->out);
+        }
+
+        return liveness_sets_t{in_sets, out_sets};
+}
+
+
+

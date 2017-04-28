@@ -11,8 +11,8 @@ namespace L2 {
         class Goto : public Instruction,
                      public Jump{
         public:
-                Goto(std::string);
-                Goto(compiler_ptr<L2_Label> target);
+                explicit Goto(std::string);
+                explicit Goto(compiler_ptr<L2_Label> target);
 
                 void dump(std::ostream &out) const override;
 
@@ -20,7 +20,7 @@ namespace L2 {
                 io_set_t kill() const override;
 
                 std::vector<Inst_Posn> find_successors(Inst_Posn pos,
-                                                        std::vector<Inst_Ptr>& instrs)  const override;
+                                                        std::vector<Inst_Ptr>& instrs)  override;
 
                 L2_Label get_target() const;
 

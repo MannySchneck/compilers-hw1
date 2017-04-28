@@ -21,7 +21,7 @@ namespace L2{
                 void dump(std::ostream &out) const override;
 
 
-                std::vector<Inst_Posn> find_successors(Inst_Posn pos, std::vector<Inst_Ptr> & instrs) const override;
+                std::vector<Inst_Posn> find_successors(Inst_Posn pos, std::vector<Inst_Ptr> & instrs) override;
 
                 void output_const_cjump(int result,
                                         const L2_Label& t_target,

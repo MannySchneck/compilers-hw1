@@ -418,8 +418,8 @@ namespace L2 {
                 L2_cjump,
                 L2_goto,
                 L2_return,
-                L2_call,
                 L2_rt_call,
+                L2_call,
                 L2_lea,
                 L2_return
                 >{};

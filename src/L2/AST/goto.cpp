@@ -34,8 +34,8 @@ io_set_t Goto::kill() const{
 }
 
 std::vector<Inst_Posn> Goto::find_successors(Inst_Posn pos,
-                                             std::vector<Inst_Ptr> & instrs) const{
-        return{find_target(instrs.cbegin(), instrs.cend(), *target)};
+                                             std::vector<Inst_Ptr> & instrs) {
+        return{find_target(instrs.begin(), instrs.end(), *target)};
 }
 
 // no computed goto

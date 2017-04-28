@@ -21,11 +21,14 @@ namespace L2{
 
 
                 using Inst_Ptr = compiler_ptr<Instruction>;
-                using Inst_Posn = std::vector<Inst_Ptr>::const_iterator;
+                using Inst_Posn = std::vector<Inst_Ptr>::iterator;
+
+                bool one_iteration_calc_io_sets(Inst_Posn,
+                                                std::vector<Inst_Ptr> & instrs);
 
                 virtual std::vector<Inst_Posn>
                 find_successors(Inst_Posn pos,
-                                std::vector<Inst_Ptr> & instrs) const;
+                                std::vector<Inst_Ptr> & instr);
 
                 void insert_name(io_set_t &io_set, const compiler_ptr<AST_Item> &id) const;
         protected:

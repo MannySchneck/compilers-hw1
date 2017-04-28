@@ -62,7 +62,7 @@ L2_Label Cond_Jump::get_false() const{
 }
 
 
-std::vector<Inst_Posn> Cond_Jump::find_successors(Inst_Posn pos, std::vector<Inst_Ptr> & instrs) const{
-        return{find_target(instrs.cbegin(), instrs.cend(), true_target),
-                        find_target(instrs.cbegin(), instrs.cend(), false_target)};
+std::vector<Inst_Posn> Cond_Jump::find_successors(Inst_Posn pos, std::vector<Inst_Ptr> & instrs){
+        return{find_target(instrs.begin(), instrs.end(), true_target),
+                        find_target(instrs.begin(), instrs.end(), false_target)};
 }

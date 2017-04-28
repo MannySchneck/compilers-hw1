@@ -1,6 +1,7 @@
 #include <L2/AST/calls.h>
 #include <L2/AST/labels.h>
 #include <L2/AST/lang_constants.h>
+#include <iostream>
 
 using namespace L2;
 
@@ -31,7 +32,7 @@ void Runtime_Call::dump(std::ostream &out) const{
                 out << "print 1";
                 break;
         case(Runtime_Fun::alloc):
-                out << "alocate 2";
+                out << "allocate 2";
                 break;
         case(Runtime_Fun::array_Error):
                 out << "array-error 2";
@@ -39,7 +40,6 @@ void Runtime_Call::dump(std::ostream &out) const{
         }
 
 
-        out << " ";
         out << ")";
 
 }
@@ -71,6 +71,8 @@ io_set_t Call::kill() const{
 
         return kill_st;
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 io_set_t Runtime_Call::gen() const{
         io_set_t gen_st;

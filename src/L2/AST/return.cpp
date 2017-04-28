@@ -16,7 +16,7 @@ void Return::dump(std::ostream &out) const{
 io_set_t Return::gen() const{
         io_set_t gen_st;
 
-        for(auto reg : Lang_Constants::caller_saves){
+        for(auto reg : Lang_Constants::callee_saves){
                 gen_st.insert(reg);
         }
 

@@ -58,7 +58,7 @@ SRCS := $(UNIT_TEST_CPP_FILES) $(L2_AST_CPP) $(L2_CPP_FILES) $(L2_MAIN_CPP) $(L1
 UNIT_TEST_OBJ := $(UNIT_TEST_CPP_FILES:src/%.cpp=obj/%.o)
 UNIT_TEST_MAIN_OBJ:= $(UNIT_TEST_MAIN:.cpp=.o)
 
-CXX_FLAGS := --std=c++1z -I./$(L1_SRC_DIR) -I./src -I./src/L2 -I./PEGTL  -g3 -Wno-write-strings
+CXX_FLAGS := --std=c++1z -O0 -I./$(L1_SRC_DIR) -I./src -I./src/L2 -I./PEGTL  -g3 -Wno-write-strings
 LD_FLAGS :=
 CXX := g++
 
