@@ -1,6 +1,11 @@
 #include <L2/AST/function.h>
+#include <L2/AST/goto.h>
+#include <L2/AST/cond_jump.h>
+#include <vector>
+#include <iterator>
 
 using namespace L2;
+
 
 Function::Function(L2_Target_Label name, int64_t args, int64_t locals) :
         name(name),
@@ -45,6 +50,15 @@ void Function::dump(std::ostream &out) const{
         out << ")" << std::endl;
 }
 
-std::vector<io_set_t> Function::make_liveness_set() const {
-        return std::vector<io_set_t>{};
+
+
+std::vector<Inst_Posn> Function::find_successors(Inst_Posn pos){
+
+        return (*pos)->find_successors(pos, instructions);
+}
+
+liveness_sets_t Function::make_liveness_set() const {
+        std::unordered_set<int> dirty;
+
+        return liveness_sets_t{};
 }

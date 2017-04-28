@@ -4,6 +4,7 @@
 #include <string>
 #include <ostream>
 
+
 namespace L2 {
 
         class L2_Label :
@@ -21,6 +22,12 @@ namespace L2 {
                 io_set_t gen() const override;
                 io_set_t kill() const override;
 
+                inline bool operator==(const L2_Label &rhs){
+                        return labelName == rhs.labelName;
+                }
+                inline bool operator!=(const L2_Label &rhs){
+                        return ! (*this == rhs);
+                }
 
         };
 
@@ -35,3 +42,4 @@ namespace L2 {
         };
 
 }  // L2
+

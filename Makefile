@@ -80,7 +80,7 @@ SRCS := $(UNIT_TEST_CPP_FILES) $(L2_AST_CPP) $(L2_CPP_FILES) $(L2_MAIN_CPP) $(L1
 ################################################################################
 # unit tests
 ################################################################################
-unit_test: $(L1_OBJ_FILES) $(L1_AST_OBJ) $(L2_OBJ_FILES) $(L2_AST_OBJ) $(UNIT_TEST_OBJ) $(UNIT_TEST_MAIN_OBJ)
+unit_test: $(L1_OBJ_FILES) $(L1_AST_OBJ) $(L2_AST_OBJ) $(L2_OBJ_FILES)  $(UNIT_TEST_OBJ) $(UNIT_TEST_MAIN_OBJ)
 	 $(CXX_COMPILE) -o bin/$@ $^
 	./bin/unit_test
 

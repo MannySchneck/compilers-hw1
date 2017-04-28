@@ -3,8 +3,11 @@
 #include <L2/AST/lang_constants.h>
 #include <unordered_set>
 #include <string>
+#include <prettyprint.hpp>
+#include <L2/AST/marker_classes.h>
 
 using namespace L2;
+
 
 TEST_CASE("Correct gen/kill "){
 
@@ -235,6 +238,89 @@ TEST_CASE("Correct gen/kill "){
 
                 REQUIRE(shop->gen() == gen_st);
                 REQUIRE(shop->kill() == kill_st);
+        }
+
+}
+
+TEST_CASE("Label equality"){
+        L2_Label hi(":hi");
+        L2_Label hi2(":hi");
+        L2_Label hlerp(":hlerp");
+        REQUIRE(hi2 == hi);
+        REQUIRE(hlerp != hi);
+}
+
+TEST_CASE("Successor funciton"){
+        Function f{L2_Target_Label{"hi"}, 0, 0};
+
+        compiler_ptr<Instruction> store{new Binop(Binop_Op::store,
+                                                  compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                                  compiler_ptr<Binop_Rhs>{new Writable_Reg("rbx")})};
+
+        compiler_ptr<Instruction> store2{new Binop(Binop_Op::store,
+                                                   compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                                   compiler_ptr<Binop_Rhs>{new Writable_Reg("rbx")})};
+
+        compiler_ptr<Instruction> shop(new Shop{Shop_Op::left_Shift,
+                                compiler_ptr<Writable>{new Writable_Reg{"rax"}},
+                                compiler_ptr<Value_Source>{new Integer_Literal{"7"}}});
+
+        compiler_ptr<Instruction> jump(new Goto{":mlarp"});
+
+        compiler_ptr<Instruction> targ(new L2_Target_Label{":mlarp"});
+
+        compiler_ptr<Instruction> t_targ(new L2_Target_Label{":true"});
+        compiler_ptr<Instruction> f_targ(new L2_Target_Label{":false"});
+        compiler_ptr<Instruction> cjump(new Cond_Jump(Cmp_Op::equal,
+                                                      compiler_ptr<Value_Source>{new Var{"hi"}},
+                                                      compiler_ptr<Value_Source>{new Reg{"mlarp"}},
+                                                      L2_Label{":true"},
+                                                      L2_Label{":false"}));
+
+        SECTION("Successor of store"){
+                f.instructions.push_back(store);
+                f.instructions.push_back(shop);
+
+                std::stringstream ss{};
+
+                std::stringstream out{};
+
+                shop->dump(out);
+
+                (*f.find_successors(f.instructions.begin())[0])->dump(ss);
+
+                REQUIRE(ss.str() == out.str());
+        }
+
+        SECTION("Successor of goto"){
+                f.instructions.push_back(store);
+                f.instructions.push_back(jump);
+                f.instructions.push_back(shop);
+                f.instructions.push_back(targ);
+                f.instructions.push_back(store2);
+
+                std::vector<Inst_Posn> result{f.instructions.begin() + 3};
+
+
+                REQUIRE(*f.find_successors(f.instructions.begin() + 1)[0] == *result[0]);
+        }
+
+
+        SECTION("Successor of cjump"){
+                f.instructions.push_back(store); // 0
+                f.instructions.push_back(jump); // 1
+                f.instructions.push_back(shop); // 2
+                f.instructions.push_back(t_targ); //3
+                f.instructions.push_back(targ); //4
+                f.instructions.push_back(cjump); //5
+                f.instructions.push_back(f_targ); //6
+                f.instructions.push_back(store2);
+
+                std::vector<Inst_Posn> expected{f.instructions.begin() + 3, f.instructions.begin() + 6};
+
+                auto result = f.find_successors(f.instructions.begin() + 5);
+
+                REQUIRE(expected == result);
         }
 
 }

@@ -6,13 +6,18 @@
 
 namespace L2{
 
+
+
         class Function : public virtual AST_Item{
         public:
                 Function() = default;
                 Function(L2_Target_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
 
-                std::vector<io_set_t> make_liveness_set() const;
+
+                std::vector<Inst_Posn> find_successors(Inst_Posn);
+
+                liveness_sets_t make_liveness_set() const;
 
                 void dump(std::ostream &out) const override;
 

@@ -21,3 +21,14 @@ void Instruction::insert_name(io_set_t &io_set, const compiler_ptr<AST_Item> &id
         }
 
 }
+
+std::vector<Inst_Posn>
+Instruction::find_successors(Inst_Posn pos,
+                             std::vector<Inst_Ptr> &instrs) const{
+        return std::vector<Inst_Posn>{std::next(pos)};
+}
+
+std::ostream& L2::operator<<(std::ostream& out, Instruction &inst){
+        inst.dump(out);
+        return out;
+}

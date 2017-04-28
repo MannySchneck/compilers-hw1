@@ -16,12 +16,6 @@ Cond_Jump::Cond_Jump(Cmp_Op cmp,
         true_target(true_target),
         false_target(false_target){}
 
-
-
-
-
-
-
 void Cond_Jump::dump(std::ostream &out) const{
         out << "(";
         out << "cjump ";
@@ -58,4 +52,17 @@ io_set_t Cond_Jump::kill() const{
         io_set_t kill_st;
 
         return kill_st;
+}
+
+L2_Label Cond_Jump::get_true() const{
+        return true_target;
+}
+L2_Label Cond_Jump::get_false() const{
+        return false_target;
+}
+
+
+std::vector<Inst_Posn> Cond_Jump::find_successors(Inst_Posn pos, std::vector<Inst_Ptr> & instrs) const{
+        return{find_target(instrs.cbegin(), instrs.cend(), true_target),
+                        find_target(instrs.cbegin(), instrs.cend(), false_target)};
 }

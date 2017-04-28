@@ -1,8 +1,34 @@
 #include <L2/L2_parser.h>
 #include <iostream>
+#include <iterator>
 
-void print_io_set_sexpr(const std::vector<L2::io_set_t> &liveness_set){
-        return;
+
+using liveness_sets_t =  std::pair<std::vector<L2::io_set_t>, std::vector<L2::io_set_t>>;
+
+void print_io_sets(const std::vector<L2::io_set_t> &sets, std::ostream& out){
+        for(auto s : sets){
+                out << "(" << std::endl;
+                for(auto elt_it = s.begin(); elt_it != s.end(); elt_it++){
+                        out << *elt_it;
+                        if(std::next(elt_it) != s.end()) out << " ";
+                }
+                out << ")" << std::endl;
+        }
+}
+
+
+void print_liveness_sexpr(const liveness_sets_t  &liveness_sets, std::ostream& out){
+        out << "(" << std::endl;
+
+        out << "(in" << std::endl;
+        print_io_sets(liveness_sets.first, out);
+        out << ")\n" << std::endl;
+
+        out << "(out" << std::endl;
+        print_io_sets(liveness_sets.second, out);
+        out << ")\n" << std::endl;
+
+        out << ")" << std::endl;
 }
 
 int main(int argc, char** argv){
@@ -10,10 +36,11 @@ int main(int argc, char** argv){
                 std::cerr << "Usage: " << argv[0] << " <source_file>" << std::endl;
         }
 
-        print_io_set_sexpr(L2::Function{
+        print_liveness_sexpr(L2::Function{
                         L2::parse_function_file(
                                 std::string{argv[1]})}
-                .make_liveness_set());
+                .make_liveness_set(),
+                std::cout);
 
         return 0;
 }

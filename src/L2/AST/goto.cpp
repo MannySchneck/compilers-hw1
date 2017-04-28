@@ -17,6 +17,10 @@ void Goto::dump(std::ostream &out) const{
         out << ")";
 }
 
+L2_Label Goto::get_target() const{
+        return *target;
+}
+
 io_set_t Goto::gen() const{
         io_set_t gen_st;
 
@@ -27,6 +31,11 @@ io_set_t Goto::kill() const{
         io_set_t kill_st;
 
         return kill_st;
+}
+
+std::vector<Inst_Posn> Goto::find_successors(Inst_Posn pos,
+                                             std::vector<Inst_Ptr> & instrs) const{
+        return{find_target(instrs.cbegin(), instrs.cend(), *target)};
 }
 
 // no computed goto
