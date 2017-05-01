@@ -8,6 +8,7 @@
 /a.out
 /bin
 /obj/catch_maino
+/lib/boost*
 *.out
 *.bak
 *.tmp

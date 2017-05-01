@@ -11,7 +11,7 @@ namespace L2{
                 Program() = default;
                 Program(Program&& rhs) = default;
 
-                Program(std::string label);
+                explicit Program(std::string label);
 
                 ~Program() override = default;
 
