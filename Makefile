@@ -21,13 +21,12 @@ L1_CPP_FILES = $(wildcard $(L1_SRC_DIR)/*.cpp)
 L1_MAIN_CPP := $(wildcard $(L1_SRC_DIR)/main/*.cpp)
 L1_HDR_FILES := $(L1_CPP_FILES:%.cpp=%.h)
 
-L1_MAIN_OBJ := $(addprefix $(L1_OBJ_DIR),$(notdir $(L1_MAIN_CPP:.cpp=.o)))
+L1_MAIN_OBJ := $(addprefix $(L1_OBJ_DIR),$(L1_MAIN_CPP:src/%.cpp=%.o))
 L1_OBJ_FILES := $(addprefix $(L1_OBJ_DIR),$(L1_CPP_FILES:src/%.cpp=%.o))
 #L2
 L2_SRC_DIR := src/L2
 L2_AST_DIR := src/L2/AST
 L2_OBJ_DIR := obj/
-
 
 SRC_DIRS += $(L2_SRC_DIR)
 SRC_DIRS += $(L2_AST_DIR)
@@ -47,7 +46,7 @@ UNIT_TEST_SRC_DIR := src/unit_tests
 UNIT_TEST_CPP_FILES := $(wildcard $(UNIT_TEST_SRC_DIR)/*.cpp)
 UNIT_TEST_MAIN := $(UNIT_TEST_SRC_DIR)/main/catch_main.cpp
 
-SRC_DIRS += $(UNIT_TEST_SRC_DIR) $(L2_SRC_DIR)/main
+SRC_DIRS += $(UNIT_TEST_SRC_DIR) $(L2_SRC_DIR)/main $(L1_SRC_DIR)/main
 
 OBJ_DIRS := $(SRC_DIRS:src/%=obj/%)
 DEP_DIRS := $(SRC_DIRS:src/%=$(DEPDIR)/%)
@@ -69,7 +68,6 @@ $(shell mkdir -p $(DIRS) lib;)
 all: L2
 
 .PHONY: clean dirs
-
 
 clean:
 	rm -rf bin/ obj/ *.out *.o *.S core.* tests/L1/*.tmp tests/liveness/*.tmp
@@ -101,6 +99,8 @@ L1_test: L1
 ################################################################################
 L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
+
+test: L2_test
 
 L2_test: L2
 	./scripts/L2_test.sh

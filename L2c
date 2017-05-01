@@ -1,0 +1,12 @@
+#!/bin/bash
+
+./bin/L2 $@
+if ! test -f prog.L1 ; then
+  exit ;
+fi
+
+pushd ./ ;
+cd ../L1 ;
+./L1c ../L2/prog.L1 ;
+mv a.out ../L2 ;
+popd ;
