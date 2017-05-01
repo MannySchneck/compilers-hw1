@@ -3,6 +3,7 @@ DEPDIR := .d
 
 
 # TODO: Somehow use this to simplify...
+# TODO: Refactor with minnet makefile as model
 # FIND_SRCS := $(shell find src -iname *.cpp)
 # $(info Found srcs  $(FIND_SRC))
 
@@ -26,18 +27,21 @@ L1_OBJ_FILES := $(addprefix $(L1_OBJ_DIR),$(L1_CPP_FILES:src/%.cpp=%.o))
 #L2
 L2_SRC_DIR := src/L2
 L2_AST_DIR := src/L2/AST
+L2_REG_DIR := src/L2/reg_allocation
 L2_OBJ_DIR := obj/
 
 SRC_DIRS += $(L2_SRC_DIR)
 SRC_DIRS += $(L2_AST_DIR)
+SRC_DIRS += $(L2_REG_DIR)
 
 L2_AST_CPP := $(wildcard $(L2_AST_DIR)/*.cpp)
 L2_AST_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_AST_CPP:src/%.cpp=%.o))
-L2_AST_HDR:= $(L2_AST_CPP:%.cpp=%.h)
+
+L2_REG_CPP := $(wildcard $(L2_REG_DIR)/*.cpp)
+L2_REG_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_REG_CPP:src/%.cpp=%.o))
 
 L2_CPP_FILES := $(wildcard $(L2_SRC_DIR)/*.cpp)
 L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/*.cpp)
-L2_HDR_FILES := $(L2_CPP_FILES:%.cpp=%.h)
 
 L2_MAIN_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_MAIN_CPP:src/%.cpp=%.o))
 L2_OBJ_FILES := $(addprefix $(L2_OBJ_DIR),$(L2_CPP_FILES:src/%.cpp=%.o))
@@ -52,7 +56,7 @@ OBJ_DIRS := $(SRC_DIRS:src/%=obj/%)
 DEP_DIRS := $(SRC_DIRS:src/%=$(DEPDIR)/%)
 DIRS := $(OBJ_DIRS) $(DEP_DIRS)
 
-SRCS := $(UNIT_TEST_CPP_FILES) $(L2_AST_CPP) $(L2_CPP_FILES) $(L2_MAIN_CPP) $(L1_AST_CPP) $(L1_CPP_FILES) $(L1_MAIN_CPP)
+SRCS := $(UNIT_TEST_CPP_FILES) $(L2_AST_CPP) $(L2_REG_CPP) $(L2_CPP_FILES) $(L2_MAIN_CPP) $(L1_AST_CPP) $(L1_CPP_FILES) $(L1_MAIN_CPP)
 
 UNIT_TEST_OBJ := $(UNIT_TEST_CPP_FILES:src/%.cpp=obj/%.o)
 UNIT_TEST_MAIN_OBJ:= $(UNIT_TEST_MAIN:.cpp=.o)
@@ -78,7 +82,9 @@ SRCS := $(UNIT_TEST_CPP_FILES) $(L2_AST_CPP) $(L2_CPP_FILES) $(L2_MAIN_CPP) $(L1
 ################################################################################
 # unit tests
 ################################################################################
-unit_test: $(L1_OBJ_FILES) $(L1_AST_OBJ) $(L2_AST_OBJ) $(L2_OBJ_FILES)  $(UNIT_TEST_OBJ) $(UNIT_TEST_MAIN_OBJ)
+integration_test: L1_test liveness_test
+
+unit_test: $(L1_OBJ_FILES) $(L1_AST_OBJ) $(L2_AST_OBJ) $(L2_REG_OBJ) $(L2_OBJ_FILES)  $(UNIT_TEST_OBJ) $(UNIT_TEST_MAIN_OBJ)
 	 $(CXX_COMPILE) -o bin/$@ $^
 	./bin/unit_test
 
@@ -105,7 +111,7 @@ test: L2_test
 liveness_test: L2
 	./scripts/test_liveness.sh
 
-L2_test
+L2_test:
 	./scripts/L2_test.sh
 
 ################################################################################

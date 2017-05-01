@@ -14,7 +14,7 @@ for i in *.L1 ; do
   # Generate the binary
   pushd ./ ;
   cd ../.. ;
-  ./L1c ${tests_dir}/${i} ;
+  ./L1/L1c ${tests_dir}/${i} ;
   ./a.out &> ${tests_dir}/${i}.out.tmp ;
   cmp ${tests_dir}/${i}.out.tmp ${tests_dir}/${i}.out ;
   if ! test $? -eq 0 ; then
