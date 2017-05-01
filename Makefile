@@ -102,7 +102,10 @@ L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ)
 
 test: L2_test
 
-L2_test: L2
+liveness_test: L2
+	./scripts/test_liveness.sh
+
+L2_test
 	./scripts/L2_test.sh
 
 ################################################################################

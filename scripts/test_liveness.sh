@@ -2,8 +2,8 @@
 
 passed=0 ;
 failed=0 ;
-cd tests ; 
-for i in *.L2 ; do
+cd tests/liveness ;
+for i in *.L2f ; do
 
   # If the output already exists, skip the current test
   if ! test -f ${i}.out ; then
@@ -13,10 +13,9 @@ for i in *.L2 ; do
 
   # Generate the binary
   pushd ./ ;
-  cd ../ ;
-  ./L2c tests/${i} ;
-  ./a.out &> tests/${i}.out.tmp ;
-  cmp tests/${i}.out.tmp tests/${i}.out ;
+  cd ../../ ;
+  ./liveness tests/liveness/${i} &> tests/liveness/${i}.out.tmp ;
+  cmp tests/liveness/${i}.out.tmp tests/liveness/${i}.out ;
   if ! test $? -eq 0 ; then
     echo "  Failed" ;
     let failed=$failed+1 ;
@@ -24,7 +23,7 @@ for i in *.L2 ; do
     echo "  Passed" ;
     let passed=$passed+1 ;
   fi
-  popd ; 
+  popd ;
 done
 let total=$passed+$failed ;
 
