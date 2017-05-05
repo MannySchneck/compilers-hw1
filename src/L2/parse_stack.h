@@ -23,5 +23,4 @@ namespace L2{
 
 }
 
-
 #include <L2/parse_stack.tpp>

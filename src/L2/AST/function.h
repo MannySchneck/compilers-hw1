@@ -4,8 +4,18 @@
 #include <L2/AST/marker_classes.h>
 #include <L2/AST/instruction.h>
 #include <vector>
+#include <unordered_map>
+#include <map>
+#include <set>
+
 
 namespace L2{
+
+        // Mr. Soustrup, you make me sad.
+        class IG_Node;
+
+        using neighbor_set_t = std::set<IG_Node>;
+        using adjacency_set_t = std::map<IG_Node, neighbor_set_t>;
 
         class Function : public virtual AST_Item{
         public:
@@ -16,6 +26,8 @@ namespace L2{
                 std::vector<Inst_Posn> find_successors(Inst_Posn);
 
                 void populate_liveness_sets();
+                adjacency_set_t populate_interference_graph(adjacency_set_t adjacency_set);
+
                 liveness_sets_t make_liveness_sets();
 
                 void dump(std::ostream &out) const override;

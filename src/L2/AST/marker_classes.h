@@ -66,7 +66,7 @@ namespace L2{
         ////////////////////////////////////////////////////////////////////////////////
         class L2_ID : public virtual AST_Item {
         public:
-                L2_ID(std::string name);
+                explicit L2_ID(std::string name);
                 std::string get_name();
                 std::string name;
         };

@@ -7,3 +7,7 @@ using namespace L2;
 L2_ID::L2_ID(std::string name) :
         name(name){}
 
+
+std::string L2_ID::get_name(){
+        return name;
+}

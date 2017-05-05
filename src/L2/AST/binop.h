@@ -27,9 +27,9 @@ namespace L2 {
                io_set_t kill() const override;
 
 
+                Binop_Op op;
         private:
                 compiler_ptr<Binop_Lhs> lhs;
-                Binop_Op op;
                 compiler_ptr<Binop_Rhs> rhs;
         };
 

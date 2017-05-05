@@ -1,4 +1,5 @@
 #include <L2/AST/lang_constants.h>
+#include <vector>
 
 const std::vector<std::string> Lang_Constants::arg_regs = {
         "rdi",
@@ -29,3 +30,13 @@ const std::vector<std::string> Lang_Constants::caller_saves = {
         "rdx",
         "rcx"
 };
+
+
+// Ask Andreas, how do I initialize this and have it be const?
+// need to wrap it in a class
+std::vector<std::string> Lang_Constants::regs_vector;
+
+std::unordered_set<std::string> Lang_Constants::regs_set;
+
+Lang_Constants::_init Lang_Constants::_initializer;
+
