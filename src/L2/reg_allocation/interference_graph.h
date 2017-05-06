@@ -64,6 +64,9 @@ namespace L2{
                 std::string L2_ID;
                 boost::optional<GPR_Color> color;
         };
+
+
+        std::ostream& operator<<(std::ostream& out, IG_Node n);
 }
 
 namespace std{
@@ -90,8 +93,11 @@ namespace L2{
 
         class Interference_Graph{
         public:
+
                 using neighbor_set_t = std::set<IG_Node>;
-                using adjacency_set_t = std::map<IG_Node, neighbor_set_t>;
+                using adjacency_set_t = std::map<IG_Node,
+                                                 neighbor_set_t>;
+
                 Interference_Graph(compiler_ptr<Function> f);
                 Interference_Graph(adjacency_set_t adj_set);
                 Interference_Graph();
@@ -104,7 +110,11 @@ namespace L2{
 
                 adjacency_set_t adjacency_set;
                 adjacency_set_t connect_registers();
+                bool attempt_coloring();
         };
+
+
+        std::ostream& operator<<(std::ostream& out, const Interference_Graph& ig);
 
         using neighbor_set_t = Interference_Graph::neighbor_set_t;
         using adjacency_set_t = Interference_Graph::adjacency_set_t;

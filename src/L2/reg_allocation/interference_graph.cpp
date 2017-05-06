@@ -1,7 +1,9 @@
 #include <L2/reg_allocation/interference_graph.h>
 #include <ostream>
+#include <boost/optional.hpp>
 #include <boost/optional/optional_io.hpp>
 #include <iter_enum.h>
+#include <algorithm>
 
 using namespace L2;
 
@@ -33,6 +35,16 @@ adjacency_set_t Interference_Graph::connect_registers(){
                 a_set[IG_Node{GPR_Color_to_string(color), color}] = neighbors;
         }
         return a_set;
+}
+
+bool Interference_Graph::attempt_coloring(){
+        using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
+
+        std::vector<node_edges_pair_t> node_stack;
+
+        for(auto node_edges_pair : adjacency_set){
+                node_stack.push_back(node_edges_pair);
+        }
 }
 
 std::ostream& L2::operator<<(std::ostream& out, const Interference_Graph& ig){

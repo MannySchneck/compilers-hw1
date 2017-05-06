@@ -3,6 +3,7 @@
 #include <L2/AST/marker_classes.h>
 #include <L2/AST/instruction.h>
 #include <L2/AST/labels.h>
+#include <algorithm>
 
 using namespace L2;
 
