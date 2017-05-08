@@ -101,6 +101,7 @@ namespace L2{
                                                  neighbor_set_t>;
 
                 Interference_Graph(compiler_ptr<Function> f);
+                Interference_Graph(Function* f);
                 Interference_Graph(adjacency_set_t adj_set);
                 Interference_Graph();
 

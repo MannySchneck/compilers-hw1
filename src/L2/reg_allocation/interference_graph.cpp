@@ -19,6 +19,13 @@ Interference_Graph::Interference_Graph(compiler_ptr<Function> f){
         adjacency_set = f->populate_interference_graph(adjacency_set);
 }
 
+Interference_Graph::Interference_Graph(Function* f){
+        adjacency_set = connect_registers();
+
+        f->populate_liveness_sets();
+        adjacency_set = f->populate_interference_graph(adjacency_set);
+}
+
 Interference_Graph::Interference_Graph(adjacency_set_t adj_set) :
         adjacency_set(adj_set)
 {}

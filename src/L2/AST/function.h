@@ -28,6 +28,8 @@ namespace L2{
                 void populate_liveness_sets();
                 adjacency_set_t populate_interference_graph(adjacency_set_t adjacency_set);
 
+                compiler_ptr<Function> allocate_registers();
+
                 liveness_sets_t make_liveness_sets();
 
                 void dump(std::ostream &out) const override;

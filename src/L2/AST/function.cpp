@@ -5,6 +5,7 @@
 #include <iterator>
 #include <numeric>
 #include <L2/reg_allocation/interference_graph.h>
+#include <iostream>
 
 using namespace L2;
 
@@ -133,7 +134,7 @@ populate_interference_graph(adjacency_set_t adjacency_set){
                 // handle architectural requirements
                 // c++ is terrible. How do you concatenate compile time
                 // constant arrays?
-                // pre Assumes correct l2 program. Never given a reg other than rcx
+                // pre: Assumes correct l2 program. Never given a reg other than rcx
                 auto shop_p = dynamic_cast<Shop*>(inst.get());
                 L2_ID* id_p;
                 if(shop_p &&
@@ -150,4 +151,35 @@ populate_interference_graph(adjacency_set_t adjacency_set){
         // functions
 
         return adjacency_set;
+}
+
+
+using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
+compiler_ptr<Function> Function::allocate_registers(){
+        populate_liveness_sets();
+
+        bool allocated{false};
+        do{
+                Interference_Graph ig{this};
+
+                std::pair<adjacency_set_t,
+                          std::vector<node_edges_pair_t>>// I don't really need
+                         coloring_result = ig.attempt_coloring(); //the neighbors here, do I
+
+                if(coloring_result.second.size() == 0){ // nothing to spill, we're done
+                        // Construct function from colored graph
+                        allocated = true;
+
+                } else {
+                        // reconstruct function with spilling and go again
+                        allocated = false;
+                }
+
+        } while(!allocated);
+
+        auto regs_only_new_f  = std::make_shared<Function>();
+
+        regs_only_new_f->name = name;
+
+        return regs_only_new_f;
 }
