@@ -44,8 +44,9 @@ namespace L2{
                 IG_Node(std::string);
                 IG_Node(std::string, GPR_Color);
 
-                boost::optional<GPR_Color> get_color();
+                std::string get_name() const;
                 void set_color(GPR_Color c);
+                boost::optional<GPR_Color> get_color() const;
 
                 bool operator==(const IG_Node &rhs) const{
                         return this->L2_ID == rhs.L2_ID
@@ -56,13 +57,14 @@ namespace L2{
                         return this->L2_ID < rhs.L2_ID;
                 }
 
-                std::string get_name();
 
                 friend std::hash<IG_Node>;
                 friend std::ostream& operator<<(std::ostream& out, IG_Node n);
+
+
+                boost::optional<GPR_Color> color;
         private:
                 std::string L2_ID;
-                boost::optional<GPR_Color> color;
         };
 
 
@@ -110,7 +112,12 @@ namespace L2{
 
                 adjacency_set_t adjacency_set;
                 adjacency_set_t connect_registers();
-                bool attempt_coloring();
+                using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
+                std::pair<adjacency_set_t,
+                          std::vector<node_edges_pair_t>>
+                                               attempt_coloring();
+
+                std::set<GPR_Color> get_neighbor_colors(IG_Node n);
         };
 
 
@@ -120,5 +127,4 @@ namespace L2{
         using adjacency_set_t = Interference_Graph::adjacency_set_t;
 
         std::string GPR_Color_to_string(GPR_Color c);
-
 }

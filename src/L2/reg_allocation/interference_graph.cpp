@@ -37,14 +37,67 @@ adjacency_set_t Interference_Graph::connect_registers(){
         return a_set;
 }
 
-bool Interference_Graph::attempt_coloring(){
-        using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
+
+// if coloring succeeds, this coloring is assigned to the graph. Else the graph doesn't change.
+using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
+std::pair<adjacency_set_t, std::vector<node_edges_pair_t>>
+        Interference_Graph::attempt_coloring(){
+
+        // setting up stack for graph construction
 
         std::vector<node_edges_pair_t> node_stack;
 
         for(auto node_edges_pair : adjacency_set){
                 node_stack.push_back(node_edges_pair);
         }
+        std::sort(node_stack.begin(), node_stack.end(), [](const node_edges_pair_t& a,
+                                                           const node_edges_pair_t& b){
+                          return a.second.size() < b.second.size();
+                  });
+
+        // actual coloring starts here....
+
+        adjacency_set_t new_graph;
+
+        std::vector<node_edges_pair_t> spill_nodes;
+
+        for(auto node : node_stack){
+                if(!node.first.color){
+                        for(auto color : Enum<GPR_Color>()){ // bad
+                                if(get_neighbor_colors(node.first).count(color) == 0){
+                                        node.first.set_color(color);
+                                        new_graph[node.first] = node.second;
+                                        break;
+                                }
+                        }
+                        if(!node.first.color){
+                                spill_nodes.push_back(node);
+                        }
+                }
+        }
+
+        return {new_graph, spill_nodes};
+        // Ok... This is crap. Now where do I call the fucker?
+}
+
+
+// this is crap
+std::set<GPR_Color> Interference_Graph::get_neighbor_colors(IG_Node n){
+
+
+        std::set<GPR_Color> neighbor_colors;
+
+        for(auto neighbor : adjacency_set[n]){
+                for(auto node_and_neighbors : adjacency_set){
+                        if(node_and_neighbors.first.get_name() == neighbor.get_name()){
+                                if(node_and_neighbors.first.color){
+                                        neighbor_colors.insert(*node_and_neighbors.first.color);
+                                }
+                        }
+                }
+        }
+
+        return neighbor_colors;
 }
 
 std::ostream& L2::operator<<(std::ostream& out, const Interference_Graph& ig){
@@ -64,7 +117,7 @@ IG_Node::IG_Node(std::string L2_ID, GPR_Color color) :
         L2_ID(L2_ID),
         color(color){}
 
-boost::optional<GPR_Color> IG_Node::get_color(){
+boost::optional<GPR_Color> IG_Node::get_color() const{
         return color;
 }
 
@@ -72,7 +125,7 @@ void IG_Node::set_color(GPR_Color c){
         color = c;
 }
 
-std::string IG_Node::get_name(){
+std::string IG_Node::get_name() const{
         return L2_ID;
 }
 

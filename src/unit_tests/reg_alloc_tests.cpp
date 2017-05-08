@@ -5,7 +5,7 @@
 #include <boost/optional/optional_io.hpp>
 #include <catch.hpp>
 #include <algorithm>
-#include <prettyprint.hpp>
+//#include <prettyprint.hpp>
 
 // TEST_CASE("test boost optional to see if it works..."){
 //         SECTION("stupid"){
@@ -120,5 +120,29 @@ TEST_CASE("interference graph generation"){
                                                         Lang_Constants::callee_saves.end());
 
                 REQUIRE(Interference_Graph{f} == Interference_Graph{regs_connected});
+        }
+
+        SECTION("get colors"){
+                Interference_Graph graph{regs_connected};
+
+                std::set<GPR_Color> expected_colors;
+
+                for(auto color : Enum<GPR_Color>()){
+                        if(color != GPR_Color::rax)
+                                expected_colors.insert(color);
+                }
+
+                // std::cout << "Here it is!" << std::endl;
+                // for(auto color : expected_colors){
+                //         std::cout << (int) color;
+                // }
+
+                // std::cout << std::endl;
+                // std::cout << std::endl;
+                // for(auto color : graph.get_neighbor_colors(IG_Node{"rax"})){
+                //         std::cout << (int) color;
+                // }
+
+                REQUIRE(graph.get_neighbor_colors(IG_Node{"rax"}) == expected_colors);
         }
 }

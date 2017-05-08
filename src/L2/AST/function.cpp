@@ -104,8 +104,6 @@ adjacency_set_t draw_intra_set_edges(adjacency_set_t &adj, const io_set_t &st){
         return adj;
 }
 
-
-
 // TODO: filter on reg vs var
 // pre: liveness sets are populated!
 // pre: inter-reg connections have been added
