@@ -38,3 +38,8 @@ io_set_t Shop::kill() const{
 
         return kill_st;
 }
+
+Inst_Ptr Shop::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
+        throw std::logic_error("nope, didn't implement Shop");
+        return Inst_Ptr{};
+}

@@ -48,3 +48,8 @@ io_set_t LEA::kill() const{
 
         return kill_st;
 }
+
+Inst_Ptr LEA::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
+        throw std::logic_error("nope, didn't implement LEA");
+        return Inst_Ptr{};
+}

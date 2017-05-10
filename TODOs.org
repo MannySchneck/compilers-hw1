@@ -1,4 +1,1 @@
-* Failing Tests
-** Test 26 parse error
-** Test 30 bad output
-*** 
+* TODO refactor instruction methods to visitor pattern (A3)
