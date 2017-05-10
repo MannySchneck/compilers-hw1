@@ -15,6 +15,9 @@ namespace L2 {
 
 
                 int64_t stack_shift;
+
+
+                Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
         };
 
 }  // L2

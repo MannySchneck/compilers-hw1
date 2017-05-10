@@ -7,10 +7,14 @@
 #include <boost/optional.hpp>
 #include <ostream>
 #include <L2/AST/lang_constants.h>
-#include <L2/AST/L2.h>
+#include <L2/AST/ast_item.h>
+#include <L2/AST/instruction.h>
 // Takes liveness sets and generates an interference graph.
 
+
 namespace L2{
+
+        class Function;
 
         enum class GPR_Color{
                 rdi,
@@ -38,6 +42,7 @@ namespace L2{
 //                                  IG node                                  //
 ///////////////////////////////////////////////////////////////////////////////
 
+
         class IG_Node{
         public:
                 IG_Node();
@@ -60,6 +65,8 @@ namespace L2{
 
                 friend std::hash<IG_Node>;
                 friend std::ostream& operator<<(std::ostream& out, IG_Node n);
+                friend bool operator==(const compiler_ptr<IG_Node>& node1,
+                                       const compiler_ptr<IG_Node>& node2);
 
 
                 boost::optional<GPR_Color> color;
@@ -69,6 +76,9 @@ namespace L2{
 
 
         std::ostream& operator<<(std::ostream& out, IG_Node n);
+
+        bool operator==(const compiler_ptr<IG_Node>& node1,
+                        const compiler_ptr<IG_Node>& node2);
 }
 
 namespace std{
@@ -93,16 +103,33 @@ namespace L2{
 
         std::ostream& operator<<(std::ostream& out, GPR_Color c);
 
+        std::ostream& operator<<(std::ostream& out, const std::shared_ptr<IG_Node>& ptr);
+
         class Interference_Graph{
         public:
 
-                using neighbor_set_t = std::set<IG_Node>;
-                using adjacency_set_t = std::map<IG_Node,
+                // References to preexisting nodes (neighborship for example),
+                // is handled by only giving out pointers.
+                // Canonical "node set" avoids duplication of color info
+
+                // Something something another layer of indirection
+
+                class Node_Ptr_Cmp{
+                public:
+                        bool operator()(const compiler_ptr<IG_Node>& lhs,
+                                   const compiler_ptr<IG_Node>& rhs){
+                                return lhs->get_name() < rhs->get_name();
+                        }
+                };
+
+                using nodes_set_t = std::map<std::string, compiler_ptr<IG_Node>>;
+                using neighbor_set_t = std::set<compiler_ptr<IG_Node>,
+                                                Node_Ptr_Cmp>;
+                using adjacency_set_t = std::map<std::string,
                                                  neighbor_set_t>;
 
                 Interference_Graph(compiler_ptr<Function> f);
                 Interference_Graph(Function* f);
-                Interference_Graph(adjacency_set_t adj_set);
                 Interference_Graph();
 
                 bool operator==(const Interference_Graph &rhs) const{
@@ -111,14 +138,30 @@ namespace L2{
 
                 friend std::ostream& operator<<(std::ostream&, const Interference_Graph&);
 
-                adjacency_set_t adjacency_set;
-                adjacency_set_t connect_registers();
-                using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
-                std::pair<adjacency_set_t,
-                          std::vector<node_edges_pair_t>>
-                                               attempt_coloring();
 
-                std::set<GPR_Color> get_neighbor_colors(IG_Node n);
+                // Methods to do things:
+
+                // Adds bidirectional edge
+                void add_edge(std::string, std::string);
+
+                // Only callable from constructor
+                void connect_registers();
+
+                // TODO: methods to query the finished graph
+                std::unordered_map<std::string, std::string> get_reg_map();
+                std::set<GPR_Color> get_neighbor_colors(std::string id);
+
+
+                void draw_intra_set_edges(const io_set_t &st);
+
+                std::vector<compiler_ptr<IG_Node>> attempt_coloring();
+
+                ////////////////////
+                //data
+                ////////////////////
+                nodes_set_t nodes_set;
+                adjacency_set_t adjacency_set;
+
         };
 
 

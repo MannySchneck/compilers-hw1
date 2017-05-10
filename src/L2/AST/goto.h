@@ -24,6 +24,8 @@ namespace L2 {
 
                 L2_Label get_target() const;
 
+
+                Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
         private:
                 compiler_ptr<L2_Label> target;
         };

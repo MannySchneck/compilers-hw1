@@ -1,4 +1,5 @@
 #include <L2/reg_allocation/interference_graph.h>
+#include <L2/AST/L2.h>
 #include <iter_enum.h>
 #include <iostream>
 #include <boost/optional.hpp>
@@ -6,7 +7,8 @@
 #include <catch.hpp>
 #include <algorithm>
 #include <sstream>
-//#include <prettyprint.hpp>
+#include <prettyprint.hpp>
+#include <L2/L2_parser.h>
 
 // TEST_CASE("test boost optional to see if it works..."){
 //         SECTION("stupid"){
@@ -37,14 +39,20 @@ TEST_CASE("interference graph generation"){
                                    compiler_ptr<Binop_Rhs> {new Writable_Reg("blerp")})};
 
         compiler_ptr<Instruction>
+                rdi2foo{new Binop(Binop_Op::store,
+                                  compiler_ptr<Binop_Lhs>{new Writable_Reg("foo")},
+                                  compiler_ptr<Binop_Rhs>{new Writable_Reg("rdi")})};
+
+
+        compiler_ptr<Instruction>
                 storevar2{new Binop(Binop_Op::store,
-                                   compiler_ptr<Binop_Lhs> {new Var("foo")},
-                                   compiler_ptr<Binop_Rhs> {new Writable_Reg("rax")})};
+                                    compiler_ptr<Binop_Lhs> {new Var("foo")},
+                                    compiler_ptr<Binop_Rhs> {new Writable_Reg("rax")})};
 
         compiler_ptr<Instruction>
                 foo_to_ret{new Binop(Binop_Op::store,
-                                 compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
-                                 compiler_ptr<Binop_Rhs>{new Writable_Reg("foo")})};
+                                     compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                     compiler_ptr<Binop_Rhs>{new Writable_Reg("foo")})};
 
         compiler_ptr<Instruction> shop(new Shop{Shop_Op::left_Shift,
                                 compiler_ptr<Writable>{new Writable_Reg{"rax"}},
@@ -66,21 +74,14 @@ TEST_CASE("interference graph generation"){
         compiler_ptr<Instruction> ret(new Return(0));
 
 
-        adjacency_set_t regs_connected;
-
-        for(auto color : Enum<GPR_Color>{}){
-                neighbor_set_t neighbors;
-                for(auto color2 : Enum<GPR_Color>{}){
-                        if(color != color2){
-                                neighbors.insert(IG_Node{GPR_Color_to_string(color2),
-                                                        color2});
-                        }
-                }
-                regs_connected[IG_Node{GPR_Color_to_string(color), color}] = neighbors;
-        }
+        Interference_Graph ig;
 
 
         compiler_ptr<L2::Function> f(new Function());
+
+        SECTION("Sanity check"){
+                REQUIRE(ig == ig);
+        }
 
         SECTION("Store"){
                 /*
@@ -98,14 +99,13 @@ TEST_CASE("interference graph generation"){
                 f->instructions.push_back(ret);
                 f->populate_liveness_sets();
 
-                Interference_Graph exp_result{regs_connected};
                 Interference_Graph result{f};
 
                 adjacency_set_t diff;
 
-                //std::cout << diff;
+                //std::cout << ig;
 
-                REQUIRE(result == exp_result);
+                REQUIRE(result == ig);
         }
 
         SECTION("Store var"){
@@ -131,61 +131,129 @@ TEST_CASE("interference graph generation"){
 
                 //std::cout << f->make_liveness_sets();
 
-                regs_connected[IG_Node{"blerp"}].insert(Lang_Constants::callee_saves.begin(),
-                                                        Lang_Constants::callee_saves.end());
-
-                REQUIRE(Interference_Graph{f} == Interference_Graph{regs_connected});
-        }
-
-        SECTION("get colors"){
-                Interference_Graph graph{regs_connected};
-
-                std::set<GPR_Color> expected_colors;
-
-                for(auto color : Enum<GPR_Color>()){
-                        if(color != GPR_Color::rax)
-                                expected_colors.insert(color);
+                for(auto reg : Lang_Constants::callee_saves){
+                        ig.add_edge("blerp", reg);
                 }
 
-                // std::cout << "Here it is!" << std::endl;
-                // for(auto color : expected_colors){
-                //         std::cout << (int) color;
-                // }
-
-                // std::cout << std::endl;
-                // std::cout << std::endl;
-                // for(auto color : graph.get_neighbor_colors(IG_Node{"rax"})){
-                //         std::cout << (int) color;
-                // }
-
-                REQUIRE(graph.get_neighbor_colors(IG_Node{"rax"}) == expected_colors);
+                REQUIRE(Interference_Graph{f} == ig);
         }
 
-        SECTION("Simple reg alloc"){
-                /*
-                  (:f
-                  0 0
-                  (foo <- rdi)
-                  (rax <- rdi)
-                  (ret)
-                  )
-                 */
-                f->instructions.push_back(storevar2);
-                f->instructions.push_back(foo_to_ret);
-                f->instructions.push_back(ret);
+        // SECTION("get colors"){
 
-                auto newF = f->allocate_registers();
+        //         Interference_Graph graph;
 
-                std::stringstream ss;
+        //         std::set<GPR_Color> expected_colors;
 
-                newF->dump(ss);
+        //         for(auto color : Enum<GPR_Color>()){
+        //                 if(color != GPR_Color::rax)
+        //                         expected_colors.insert(color);
+        //         }
 
-                REQUIRE(ss.str() ==
-                        "(:f\n"           \
-                        "0 0\n"           \
-                        "(rdi <- rdi)\n"  \
-                        "(rax <- rdi)\n"  \
-                        "(return)"        \
-                        );
+        //         // std::cout << "Here it is!" << std::endl;
+        //         // for(auto color : expected_colors){
+        //         //         std::cout << (int) color;
+        //         // }
+
+        //         // std::cout << std::endl;
+        //         // std::cout << std::endl;
+        //         // for(auto color : graph.get_neighbor_colors(IG_Node{"rax"})){
+        //         //         std::cout << (int) color;
+        //         // }
+
+        //         REQUIRE(graph.get_neighbor_colors("rax") == expected_colors);
+        // }
+
+        SECTION("Reg allocation"){
+                std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
+                SECTION("Trivial reg alloc"){
+                        /*
+                          (:f
+                          0 0
+                          (r8 <- rdi)
+                          (r8 += 3)
+                          (r8 -= rdi)
+                          (rax <- r8)
+                          (ret)
+                          )
+                        */
+                        compiler_ptr<Instruction>
+                                rdi2r8{new Binop(Binop_Op::store,
+                                                 compiler_ptr<Binop_Lhs> {new Writable_Reg("r8")},
+                                                 compiler_ptr<Binop_Rhs> {new Writable_Reg("rdi")})};
+                        compiler_ptr<Instruction>
+                                r82rax{new Binop(Binop_Op::store,
+                                                 compiler_ptr<Binop_Lhs> {new Writable_Reg("rax")},
+                                                 compiler_ptr<Binop_Rhs> {new Writable_Reg("r8")})};
+
+
+                        compiler_ptr<Instruction>
+                                sub_rdi{new Binop(Binop_Op::sub_Assign,
+                                                  compiler_ptr<Binop_Lhs> {new Writable_Reg("r8")},
+                                                  compiler_ptr<Binop_Rhs> {new Writable_Reg("rdi")})};
+
+                        compiler_ptr<Instruction>
+                                add3{new Binop(Binop_Op::add_Assign,
+                                               compiler_ptr<Binop_Lhs> {new Writable_Reg("r8")},
+                                               compiler_ptr<Binop_Rhs> {new Integer_Literal("3")})};
+
+
+                        f->instructions.push_back(rdi2r8);
+                        f->instructions.push_back(add3);
+                        f->instructions.push_back(sub_rdi);
+                        f->instructions.push_back(r82rax);
+                        f->instructions.push_back(ret);
+                        f->name = L2_Target_Label(":f");
+
+                        std::stringstream ss;
+
+                        auto new_f = f->allocate_registers();
+
+                        new_f->dump(ss);
+
+
+                        REQUIRE(ss.str() ==
+                                "(:f\n"           \
+                                "0 0\n"           \
+                                "(r8 <- rdi)\n"  \
+                                "(r8 += 3)\n"  \
+                                "(r8 -= rdi)\n"  \
+                                "(rax <- r8)\n"  \
+                                "(return)\n"        \
+                                ")\n");
+                }
+
+
+                SECTION("Simple reg alloc"){
+                        /*
+                          (:f
+                          0 0
+                          (foo <- rdi)
+                          (rax <- rdi)
+                          (ret)
+                          )
+                        */
+                        f->instructions.push_back(rdi2foo);
+                        f->instructions.push_back(foo_to_ret);
+                        f->instructions.push_back(ret);
+                        f->name = L2_Target_Label(":f");
+
+                        Function fun = parse_function_file(test_prefix.append("test1.l2f"));
+
+                        compiler_ptr<Function> fun_ptr{new Function(std::move(fun))};
+
+                        auto newF = fun_ptr->allocate_registers();
+
+                        std::stringstream ss;
+
+                        newF->dump(ss);
+
+                        REQUIRE(ss.str() ==
+                                "(:f\n"           \
+                                "0 0\n"           \
+                                "(rdi <- rdi)\n"  \
+                                "(rax <- rdi)\n"  \
+                                "(return)\n"      \
+                                ")\n");
+                }
         }
 }

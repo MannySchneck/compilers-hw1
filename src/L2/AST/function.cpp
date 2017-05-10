@@ -1,11 +1,14 @@
 #include <L2/AST/function.h>
 #include <L2/AST/goto.h>
 #include <L2/AST/cond_jump.h>
+#include <L2/AST/shop.h>
+#include <L2/AST/var.h>
 #include <vector>
 #include <iterator>
 #include <numeric>
-#include <L2/reg_allocation/interference_graph.h>
 #include <iostream>
+#include "L2/reg_allocation/interference_graph.h"
+#include <prettyprint.hpp>
 
 using namespace L2;
 
@@ -89,44 +92,37 @@ liveness_sets_t Function::make_liveness_sets(){
         return liveness_sets_t{in_sets, out_sets};
 }
 
-bool not_in_reg_set(std::string id){
-        return static_cast<bool>(Lang_Constants::regs_set.count(id) == 0);
-}
-
-adjacency_set_t draw_intra_set_edges(adjacency_set_t &adj, const io_set_t &st){
-        for(auto id : st){
-                IG_Node node (id);
-                for(auto id_prime : st){
-                        if(id != id_prime && not_in_reg_set(id))
-                                adj[node].insert(IG_Node(id_prime));
-                }
-        }
-
-        return adj;
-}
 
 // TODO: filter on reg vs var
-// pre: liveness sets are populated!
-// pre: inter-reg connections have been added
-adjacency_set_t Function::
-populate_interference_graph(adjacency_set_t adjacency_set){
+// TODO: XXX FIXME XXX 
+Interference_Graph Function::
+make_interference_graph(){
         // This isn't shitty at all.
+
+        Interference_Graph interference_graph;
+
+        populate_liveness_sets();
+
         for(auto inst : instructions){
                 // connect each pair of IDs that appear in the same in or
                 // out set
+                std::cout << "DUMPING IO SETS" << std::endl;
+                interference_graph.draw_intra_set_edges(inst->in);
+                std::cout << inst->in << std::endl;
+                interference_graph.draw_intra_set_edges(inst->out);
+                std::cout << inst->out << std::endl;
+                std::cout << "/DUMP" << std::endl;
 
-                draw_intra_set_edges(adjacency_set, inst->in);
-
-                draw_intra_set_edges(adjacency_set, inst->out);
 
                 // connect the kill set to the out set (unless doing a store)
                 auto p = dynamic_cast<Binop*>(inst.get());
                 if(p && p->op != Binop_Op::store){ // =(
                         for(auto id : inst->kill()){
-                                IG_Node node(id);
                                 for(auto id_prime : inst->out){
-                                        if(id != id_prime && not_in_reg_set(id))
-                                                adjacency_set[node].insert(IG_Node(id_prime));
+                                        if(id != id_prime &&
+                                           !Lang_Constants::regs_set.count(id)){
+                                                interference_graph.add_edge(id, id_prime);
+                                        }
                                 }
                         }
                 }
@@ -139,10 +135,9 @@ populate_interference_graph(adjacency_set_t adjacency_set){
                 L2_ID* id_p;
                 if(shop_p &&
                    (id_p = dynamic_cast<Var*>(shop_p->rhs.get()))){ // =( so much for design...
-                        IG_Node node{id_p->get_name()};
                         for(auto reg :  Lang_Constants::regs_vector){
                                 if(reg != "rcx"){
-                                        adjacency_set[node].insert(IG_Node{reg});
+                                        interference_graph.add_edge(id_p->get_name(), reg);
                                 }
                         }
                 }
@@ -150,36 +145,53 @@ populate_interference_graph(adjacency_set_t adjacency_set){
         // If I was a real programmer I'd refactor these for loops into
         // functions
 
-        return adjacency_set;
+        return interference_graph;
 }
 
+void spill_these(std::vector<compiler_ptr<IG_Node>>){
+        ;
+}
 
-using node_edges_pair_t = std::pair<IG_Node, neighbor_set_t>;
 compiler_ptr<Function> Function::allocate_registers(){
         populate_liveness_sets();
 
         bool allocated{false};
+
+        Interference_Graph interference_graph;
         do{
-                Interference_Graph ig{this};
+                interference_graph = make_interference_graph();
 
-                std::pair<adjacency_set_t,
-                          std::vector<node_edges_pair_t>>// I don't really need
-                         coloring_result = ig.attempt_coloring(); //the neighbors here, do I
+                std::vector<compiler_ptr<IG_Node>>
+                        spills = interference_graph.attempt_coloring();
 
-                if(coloring_result.second.size() == 0){ // nothing to spill, we're done
-                        // Construct function from colored graph
+                if(spills.size() == 0){ // nothing to spill, we're done
                         allocated = true;
-
                 } else {
-                        // reconstruct function with spilling and go again
-                        allocated = false;
+                        // spill and go again
+                        allocated = true; //XXX WIP
+                        spill_these(spills);
                 }
 
         } while(!allocated);
+
+        std::cout << "DUMPING COLORED IG" << std::endl;
+        std::cout << interference_graph << std::endl;
+        std::cout << "DUMPING IG" << std::endl;
 
         auto regs_only_new_f  = std::make_shared<Function>();
 
         regs_only_new_f->name = name;
 
+        for(auto instr : instructions){
+                regs_only_new_f->instructions.
+                        push_back(instr->
+                                  replace_vars(interference_graph.
+                                               get_reg_map()));
+        }
+
         return regs_only_new_f;
+}
+
+void Function::spill_these(std::vector<compiler_ptr<IG_Node>> spills){
+        ;
 }

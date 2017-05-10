@@ -1,5 +1,4 @@
 #pragma once
-
 #include <ostream>
 #include <memory>
 //#include <prettyprint.hpp>

@@ -17,6 +17,9 @@ namespace L2 {
 
                 io_set_t gen() const override;
                 io_set_t kill() const override;
+
+
+                Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
         private:
                 compiler_ptr<Writable> target;
                 compiler_ptr<Writable> base;

@@ -1,9 +1,8 @@
 #pragma once
 
 #include <L2/AST/marker_classes.h>
-#include <L2/AST/instruction.h>
-
 namespace L2{
+#include <L2/AST/var.h>
         class Var : public Writable,
                     public L2_ID{
         public:
@@ -13,3 +12,5 @@ namespace L2{
         private:
         };
 }
+
+

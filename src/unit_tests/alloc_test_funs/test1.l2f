@@ -1,0 +1,6 @@
+(:t1f
+ 0 0
+ (foo <- rdi)
+ (rax <- rdi)
+ (return)
+)

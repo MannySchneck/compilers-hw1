@@ -28,6 +28,9 @@ namespace L2 {
 
 
                 Binop_Op op;
+
+
+                Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
         private:
                 compiler_ptr<Binop_Lhs> lhs;
                 compiler_ptr<Binop_Rhs> rhs;

@@ -103,7 +103,7 @@ L1_test: L1
 ################################################################################
 # L2
 ################################################################################
-L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ)
+L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ) $(L2_REG_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
 
 test: L2_test
@@ -132,4 +132,4 @@ obj/%.o : src/%.cpp $(DEPDIR)/%.d
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
 
-include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS))))
+include $(wildcard $(patsubst src/%,$(DEPDIR)/%.d,$(basename $(SRCS))))
