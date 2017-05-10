@@ -129,7 +129,7 @@ TEST_CASE("interference graph generation"){
                 f->instructions.push_back(ret);
                 f->populate_liveness_sets();
 
-                //std::cout << f->make_liveness_sets();
+                std::cout << f->make_liveness_sets();
 
                 for(auto reg : Lang_Constants::callee_saves){
                         ig.add_edge("blerp", reg);

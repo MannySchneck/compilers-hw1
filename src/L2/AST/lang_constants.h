@@ -18,10 +18,16 @@ public:
         static class _init {
         public:
                 _init(){
-                        regs_vector.insert(regs_vector.end(),callee_saves.begin(), callee_saves.end());
+                        regs_vector.insert(regs_vector.end(),
+                                           callee_saves.begin(),
+                                           callee_saves.end());
 
-                        regs_vector.insert(regs_vector.end(),caller_saves.begin(), caller_saves.end());
-                        regs_set.insert(regs_vector.begin(), regs_vector.end());
+                        regs_vector.insert(regs_vector.end(),
+                                           caller_saves.begin(),
+                                           caller_saves.end());
+
+                        regs_set.insert(regs_vector.begin(),
+                                        regs_vector.end());
                 }
         } _initializer;
 };

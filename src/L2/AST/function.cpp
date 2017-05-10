@@ -104,16 +104,12 @@ make_interference_graph(){
         populate_liveness_sets();
 
         for(auto inst : instructions){
+
+                interference_graph.draw_intra_set_edges(inst->in);
+                interference_graph.draw_intra_set_edges(inst->out);
+
                 // connect each pair of IDs that appear in the same in or
                 // out set
-                std::cout << "DUMPING IO SETS" << std::endl;
-                interference_graph.draw_intra_set_edges(inst->in);
-                std::cout << inst->in << std::endl;
-                interference_graph.draw_intra_set_edges(inst->out);
-                std::cout << inst->out << std::endl;
-                std::cout << "/DUMP" << std::endl;
-
-
                 // connect the kill set to the out set (unless doing a store)
                 auto p = dynamic_cast<Binop*>(inst.get());
                 if(p && p->op != Binop_Op::store){ // =(
@@ -153,6 +149,7 @@ void spill_these(std::vector<compiler_ptr<IG_Node>>){
 }
 
 compiler_ptr<Function> Function::allocate_registers(){
+
         populate_liveness_sets();
 
         bool allocated{false};
@@ -174,9 +171,6 @@ compiler_ptr<Function> Function::allocate_registers(){
 
         } while(!allocated);
 
-        std::cout << "DUMPING COLORED IG" << std::endl;
-        std::cout << interference_graph << std::endl;
-        std::cout << "DUMPING IG" << std::endl;
 
         auto regs_only_new_f  = std::make_shared<Function>();
 
