@@ -13,6 +13,7 @@ namespace L1{
         enum class Cmp_Case{
                 both_Int,
                 flip,
+                nothing
                 };
 
 

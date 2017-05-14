@@ -27,7 +27,7 @@ namespace L2{
 
         class Function : public virtual AST_Item{
         public:
-                Function() = default;
+                Function();
                 Function(L2_Target_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
 
@@ -53,5 +53,13 @@ namespace L2{
                 int64_t arguments;
                 int64_t locals;
                 std::vector<compiler_ptr<Instruction>> instructions;
+
+                std::string find_prefix();
+                std::string get_prefix();
+
+
+        private:
+                int prefix_counter;
+                boost::optional<std::string> prefix;
         };
 }

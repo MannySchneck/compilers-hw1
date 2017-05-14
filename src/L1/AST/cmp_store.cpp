@@ -15,9 +15,9 @@ Comparison_Store::Comparison_Store(Cmp_Op op,
 
 void Comparison_Store::translate(std::ostream& out) const{
         int result;
-        Cmp_Case arg_case;
-        Integer_Literal* ilhs;
-        Integer_Literal* irhs;
+        Cmp_Case arg_case = Cmp_Case::nothing;
+        Integer_Literal* ilhs = nullptr;
+        Integer_Literal* irhs = nullptr;
 
         if((ilhs = dynamic_cast<Integer_Literal*>(lhs.get())) &&
            (irhs = dynamic_cast<Integer_Literal*>(rhs.get()))){

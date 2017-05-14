@@ -32,6 +32,8 @@ namespace L2 {
 
 
                 Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
+
+                void accept(Instruction_Visitor v) override;
         };
 
         class L2_Target_Label :

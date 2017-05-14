@@ -1,0 +1,8 @@
+(:t2f
+ 0 0
+ (bar <- rsi)
+ (foo <- bar)
+ (rdi <- foo)
+ (rax <- rdi) 
+ (return)
+)

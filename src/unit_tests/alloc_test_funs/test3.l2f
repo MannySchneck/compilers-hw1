@@ -1,6 +1,8 @@
-(:t1f
+(:t3f
  0 0
  (foo <- rdi)
+ (bar <- rsi)
+ (foo += bar)
  (rax <- foo)
  (return)
 )

@@ -76,8 +76,6 @@ void Interference_Graph::connect_registers(){
         }
 }
 
-
-
 void Interference_Graph::
 draw_intra_set_edges(const io_set_t &st){
         for(auto id : st){
@@ -87,7 +85,6 @@ draw_intra_set_edges(const io_set_t &st){
                 }
         }
 }
-
 
 using node_stack_t = std::vector<compiler_ptr<IG_Node>>;
 node_stack_t
@@ -105,6 +102,14 @@ Interference_Graph::attempt_coloring(){
                 nodes_to_color_stack.push_back(node_ptr);
         }
 
+        std::sort(nodes_to_color_stack.begin(),
+                  nodes_to_color_stack.end(),
+                  [this](const compiler_ptr<IG_Node>& a,
+                         const compiler_ptr<IG_Node>& b){
+                          return adjacency_set.at(a->get_name()).size() <
+                                  adjacency_set.at(b->get_name()).size();
+                  });
+
         node_stack_t spill_nodes;
 
         // Try to color graph
@@ -116,11 +121,10 @@ Interference_Graph::attempt_coloring(){
                                    node_ptr->get_name()).count(color)){
                                 node_ptr->set_color(color);
                                 break;
-                                colored = true; // ugly
                         }
                 }
 
-                if(!colored){
+                if(!node_ptr->get_color()){
                         spill_nodes.push_back(node_ptr);
                 }
         }

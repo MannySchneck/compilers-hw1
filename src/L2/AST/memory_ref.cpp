@@ -4,7 +4,7 @@
 
 using namespace L2;
 
-Memory_Ref::Memory_Ref(compiler_ptr<Reg> base, int64_t offset) :
+Memory_Ref::Memory_Ref(compiler_ptr<L2_ID> base, int64_t offset) :
         base(std::move(base)),
         offset(offset)
 {
@@ -13,7 +13,7 @@ Memory_Ref::Memory_Ref(compiler_ptr<Reg> base, int64_t offset) :
         }
 };
 
-compiler_ptr<Reg> Memory_Ref::get_base(){
+compiler_ptr<L2_ID> Memory_Ref::get_base(){
         return base;
 }
 

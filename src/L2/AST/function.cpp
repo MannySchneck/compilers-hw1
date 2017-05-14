@@ -9,14 +9,23 @@
 #include <iostream>
 #include "L2/reg_allocation/interference_graph.h"
 #include <prettyprint.hpp>
+#include <sstream>
 
 using namespace L2;
 
 
+Function::Function() :
+        arguments(0),
+        locals(0),
+        prefix_counter(0),
+        prefix(""){}
+
 Function::Function(L2_Target_Label name, int64_t args, int64_t locals) :
         name(name),
         arguments(args),
-        locals(locals){}
+        locals(locals),
+        prefix_counter(0),
+        prefix(""){}
 
 int64_t Function::stack_args() const{
         return arguments < 6 ? 0 : arguments - 6;
@@ -98,7 +107,6 @@ liveness_sets_t Function::make_liveness_sets(){
 Interference_Graph Function::
 make_interference_graph(){
         // This isn't shitty at all.
-
         Interference_Graph interference_graph;
 
         populate_liveness_sets();
@@ -138,8 +146,6 @@ make_interference_graph(){
                         }
                 }
         }
-        // If I was a real programmer I'd refactor these for loops into
-        // functions
 
         return interference_graph;
 }
@@ -164,8 +170,7 @@ compiler_ptr<Function> Function::allocate_registers(){
                 if(spills.size() == 0){ // nothing to spill, we're done
                         allocated = true;
                 } else {
-                        // spill and go again
-                        allocated = true; //XXX WIP
+                        allocated = false;
                         spill_these(spills);
                 }
 
@@ -186,6 +191,22 @@ compiler_ptr<Function> Function::allocate_registers(){
         return regs_only_new_f;
 }
 
+
+
+std::string Function::find_prefix(){
+
+}
+
+std::string Function::get_prefix(){
+        if(prefix){
+                return *prefix;
+        }
+
+        else{
+                prefix = find_prefix();
+        }
+}
+
 void Function::spill_these(std::vector<compiler_ptr<IG_Node>> spills){
-        ;
+        std::string prefix = get_prefix();
 }

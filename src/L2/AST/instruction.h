@@ -3,6 +3,8 @@
 #include <L2/AST/marker_classes.h>
 #include <unordered_map>
 
+class Instruction_Visitor;
+
 namespace L2{
         using io_set_t = std::set<std::string>;
 
@@ -34,11 +36,16 @@ namespace L2{
 
                 virtual Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const = 0;
 
+///////////////////////////////////////////////////////////////////////////////
+//                                 Do a Visitor...                           //
+///////////////////////////////////////////////////////////////////////////////
+                virtual void accept(Instruction_Visitor v) = 0;
+
         protected:
                 Instruction() = default;
 
                 template<typename T>
-                compiler_ptr<T> sub_reg_mapping(std::unordered_map<std::string,
+                static compiler_ptr<T> sub_reg_mapping(std::unordered_map<std::string,
                                                 std::string> reg_map,
                                                 compiler_ptr<T> id_maybe);
         };
@@ -61,24 +68,31 @@ namespace L2{
 
 
 namespace L2{
+
+        template<typename T>
+        compiler_ptr<T> sub_var(std::unordered_map<std::string, std::string> reg_map,
+                                std::string name){
+                        return compiler_ptr<T>{
+                                new Writable_Reg{(reg_map.at(name))}}; // Writable_Reg == GPRs
+        }
+
         template<typename T>
         compiler_ptr<T> Instruction::sub_reg_mapping(std::unordered_map<std::string,
                                                      std::string> reg_map,
                                                      compiler_ptr<T> id_maybe){
 
-                // Fuck
+                // Badness here. Break var case into fun. Use on mem. (or, fix the design...)
                 Memory_Ref* mem_ptr;
                 if((mem_ptr = dynamic_cast<Memory_Ref*>(id_maybe.get()))){
                         return compiler_ptr<T>{new Memory_Ref{
-                                        compiler_ptr<Writable_Reg>{new Reg{reg_map.
-                                                at(mem_ptr->get_base()->get_name())}},
+                                        sub_var<Reg>(reg_map,
+                                                     mem_ptr->get_base()->get_name()),
                                                 mem_ptr->get_offset()}};
                 }
 
                 Var* var_ptr;
                 if((var_ptr = dynamic_cast<Var*>(id_maybe.get()))){
-                        return compiler_ptr<T>{new Writable_Reg{reg_map.
-                                                at(var_ptr->get_name())}}; // Writable_Reg == GPRs
+                        return sub_var<T>(reg_map, var_ptr->get_name());
                 }
 
                 return id_maybe;

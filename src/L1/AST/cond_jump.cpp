@@ -44,9 +44,9 @@ void Cond_Jump::gen_cjump_text(Translatable* lhs,
 
 void Cond_Jump::translate(std::ostream& out) const{
         int result;
-        Cmp_Case arg_case;
-        Integer_Literal* ilhs;
-        Integer_Literal* irhs;
+        Cmp_Case arg_case = Cmp_Case::nothing;
+        Integer_Literal* ilhs = nullptr;
+        Integer_Literal* irhs = nullptr;
 
         if((ilhs = dynamic_cast<Integer_Literal*>(Cmp_Lhs.get())) &&
            (irhs = dynamic_cast<Integer_Literal*>(Cmp_Rhs.get()))){

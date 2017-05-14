@@ -9,15 +9,15 @@ namespace L2{
                 public Binop_Rhs,
                 public Binop_Lhs {
         public:
-                explicit Memory_Ref(compiler_ptr<Reg> base, int64_t offset);
+                explicit Memory_Ref(compiler_ptr<L2_ID> base, int64_t offset);
                 void dump(std::ostream &out) const override;
 
-                compiler_ptr<Reg> get_base();
+                compiler_ptr<L2_ID> get_base();
 
                 int64_t get_offset(){return offset;}
 
         private:
-                compiler_ptr<Reg> base;
+                compiler_ptr<L2_ID> base;
                 int64_t offset;
         };
 

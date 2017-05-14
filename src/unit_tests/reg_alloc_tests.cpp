@@ -129,7 +129,6 @@ TEST_CASE("interference graph generation"){
                 f->instructions.push_back(ret);
                 f->populate_liveness_sets();
 
-                std::cout << f->make_liveness_sets();
 
                 for(auto reg : Lang_Constants::callee_saves){
                         ig.add_edge("blerp", reg);
@@ -223,12 +222,12 @@ TEST_CASE("interference graph generation"){
                 }
 
 
-                SECTION("Simple reg alloc"){
+                SECTION("dumb reg alloc"){
                         /*
                           (:f
                           0 0
-                          (foo <- rdi)
-                          (rax <- rdi)
+                          (foo <- rdi) // stupid....
+                          (rax <- foo)
                           (ret)
                           )
                         */
@@ -248,12 +247,88 @@ TEST_CASE("interference graph generation"){
                         newF->dump(ss);
 
                         REQUIRE(ss.str() ==
-                                "(:f\n"           \
+                                "(:t1f\n"           \
                                 "0 0\n"           \
                                 "(rdi <- rdi)\n"  \
                                 "(rax <- rdi)\n"  \
                                 "(return)\n"      \
                                 ")\n");
                 }
+
+                SECTION("Simple reg alloc"){
+
+                        Function fun = parse_function_file(test_prefix.append("test2.l2f"));
+
+                        compiler_ptr<Function> fun_ptr{new Function(std::move(fun))};
+
+                        auto newF = fun_ptr->allocate_registers();
+
+                        std::stringstream ss;
+
+                        newF->dump(ss);
+
+                        REQUIRE(ss.str() ==
+                                "(:t2f\n"           \
+                                "0 0\n"           \
+                                "(rdi <- rsi)\n"  \
+                                "(rdi <- rdi)\n"  \
+                                "(rdi <- rdi)\n"  \
+                                "(rax <- rdi)\n"  \
+                                "(return)\n"      \
+                                ")\n");
+                }
+
+
+                SECTION("Siple conflicting reg alloc"){
+
+                                Function fun = parse_function_file(test_prefix.append("test3.l2f"));
+
+                                compiler_ptr<Function> fun_ptr{new Function(std::move(fun))};
+
+                                auto newF = fun_ptr->allocate_registers();
+
+                                std::stringstream ss;
+
+                                newF->dump(ss);
+
+                                REQUIRE(ss.str() ==
+                                        "(:t3f\n" \
+                                        "0 0\n"   \
+                                        "(rdx <- rdi)\n"  \
+                                        "(rdi <- rsi)\n"  \
+                                        "(rdx += rdi)\n"  \
+                                        "(rax <- rdx)\n"  \
+                                        "(return)"      \
+                                        "\n)\n");
+                }
+
+        }
+
+}
+
+TEST_CASE("Spilling", "[!hide]"){
+
+        std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
+        SECTION("Allocation on 16 live vars"){
+                Function fun = parse_function_file(test_prefix.append("test4.l2f"));
+
+                compiler_ptr<Function> fun_ptr{new Function(std::move(fun))};
+
+                auto newF = fun_ptr->allocate_registers();
+
+                std::stringstream ss;
+
+                newF->dump(ss);
+
+                REQUIRE(ss.str() ==
+                        "(:t3f\n" \
+                        "0 0\n"   \
+                        "(rdx <- rdi)\n"  \
+                        "(rdi <- rsi)\n"  \
+                        "(rdx += rdi)\n"  \
+                        "(rax <- rdx)\n"  \
+                        "(return)"      \
+                        "\n)\n");
         }
 }
+

@@ -71,6 +71,13 @@ io_set_t Binop::kill() const{
 
 
 Inst_Ptr Binop::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Binop");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Binop{op,
+                                sub_reg_mapping<Binop_Lhs>(reg_map, lhs),
+                                sub_reg_mapping<Binop_Rhs>(reg_map, rhs)}};
+}
+
+
+
+void ~Binop::accept(Instruction_Visitor &v){
+        v.visit(this);
 }

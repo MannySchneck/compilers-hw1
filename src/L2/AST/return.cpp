@@ -31,6 +31,5 @@ io_set_t Return::kill() const{
 }
 
 Inst_Ptr Return::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Return");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Return{stack_shift}};
 }
