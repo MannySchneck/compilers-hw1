@@ -21,7 +21,11 @@
 //         }
 // }
 
+
+
 TEST_CASE("interference graph generation"){
+
+        std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
 
         compiler_ptr<Instruction>
                 store{new Binop(Binop_Op::store,
@@ -163,7 +167,6 @@ TEST_CASE("interference graph generation"){
         // }
 
         SECTION("Reg allocation"){
-                std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
                 SECTION("Trivial reg alloc"){
                         /*
                           (:f
@@ -306,6 +309,36 @@ TEST_CASE("interference graph generation"){
 
 }
 
+TEST_CASE("test getting function prefix"){
+
+        std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
+
+        SECTION("trivial"){
+                Function fun = parse_function_file(test_prefix.append("test1.l2f"));
+
+                REQUIRE(fun.find_prefix() == "z");
+        }
+
+
+        SECTION("basic"){
+                Function funz = parse_function_file(test_prefix.append("test5.l2f"));
+
+                REQUIRE(funz.find_prefix() == "za");
+        }
+
+        SECTION("need to cycle"){
+                Function funz = parse_function_file(test_prefix.append("test6.l2f"));
+
+                REQUIRE(funz.find_prefix() == "zc");
+        }
+
+        SECTION("need to cycle twice"){
+                Function funz = parse_function_file(test_prefix.append("test7.l2f"));
+
+                REQUIRE(funz.find_prefix() == "zd");
+        }
+}
+
 TEST_CASE("Spilling", "[!hide]"){
 
         std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
@@ -331,4 +364,3 @@ TEST_CASE("Spilling", "[!hide]"){
                         "\n)\n");
         }
 }
-

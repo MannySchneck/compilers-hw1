@@ -1,0 +1,6 @@
+(:t6f
+ 0 0
+ (zafoo <- zardi)
+ (zbrax <- zfoo)
+ (return)
+)

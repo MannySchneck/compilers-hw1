@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <random>
 
+#include <catch.hpp>
+
 using namespace L2;
 
 
@@ -217,14 +219,13 @@ std::string Function::find_prefix(){
                 return std::string{'z'};
         }
         else{
-
                 char next_char = 'a';
-                std::string prefix{'z'};
+                std::string the_prefix{"za"};
                 for(; z_symbol != symbols.end(); z_symbol++){
                         auto symbol = *z_symbol;
 
                         bool found_prefix{false};
-                        // prefix can't collide with anything previous
+                        // the_prefix can't collide with anything previous
                         // since if collision was possible, it would have
                         // sorted after the string we're checking
 
@@ -233,12 +234,13 @@ std::string Function::find_prefix(){
 
                                 if(next_char == '{'){
                                         next_char = 'a';
-                                        prefix.push_back(next_char);
+                                        the_prefix.push_back(next_char);
                                 }
 
-                                if(prefix == symbol.substr(0, prefix.length())){
-                                        char prefix_add = symbol[prefix.length() - 1];
-                                        prefix[prefix.length() - 1] = prefix_add;
+                                if(the_prefix == symbol.substr(0, the_prefix.length())){
+                                        char prefix_add =
+                                                symbol[the_prefix.length() - 1] + 1;
+                                        the_prefix[the_prefix.length() - 1] = prefix_add;
                                         next_char = prefix_add + 1;
                                 }
                                 else{
@@ -246,8 +248,12 @@ std::string Function::find_prefix(){
                                 }
                         }
                 }
+
+                return the_prefix;
         }
 }
+
+
 
 std::string Function::get_prefix(){
         if(prefix){
@@ -275,3 +281,4 @@ char rando_chardrissian(){
 
         return static_cast<char>(char_);
 }
+

@@ -1,0 +1,6 @@
+(:t5f
+ 0 0
+ (zfoo <- zrdi)
+ (zrax <- zfoo)
+ (return)
+)
