@@ -61,3 +61,7 @@ Inst_Ptr Comparison_Store::replace_vars(std::unordered_map<std::string, std::str
         throw std::logic_error("nope, didn't implement Comparison_Store");
         return Inst_Ptr{};
 }
+
+void Comparison_Store::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

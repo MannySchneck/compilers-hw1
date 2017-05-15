@@ -44,3 +44,7 @@ Inst_Ptr Goto::replace_vars(std::unordered_map<std::string, std::string> reg_map
         throw std::logic_error("nope, didn't implement Goto");
         return Inst_Ptr{};
 }
+
+void Goto::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

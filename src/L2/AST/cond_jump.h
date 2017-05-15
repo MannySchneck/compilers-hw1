@@ -43,13 +43,16 @@ namespace L2{
 
                 Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
 
-                void accept(Instruction_Visitor v) override;
+                void accept(Instruction_Visitor &v) override;
         private:
                 Cmp_Op cmp;
                 compiler_ptr<Value_Source> cmp_lhs;
                 compiler_ptr<Value_Source> cmp_rhs;
                 L2_Label true_target;
                 L2_Label false_target;
+
+
+                friend class Get_Ids_Visitor;
         };
 
 }

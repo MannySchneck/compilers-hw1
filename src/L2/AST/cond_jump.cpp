@@ -71,3 +71,7 @@ Inst_Ptr Cond_Jump::replace_vars(std::unordered_map<std::string, std::string> re
         throw std::logic_error("nope, didn't implement Cond_Jump");
         return Inst_Ptr{};
 }
+
+void Cond_Jump::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

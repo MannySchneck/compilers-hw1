@@ -59,6 +59,7 @@ namespace L2{
 
 
         private:
+                static char rando_chardrissian();
                 int prefix_counter;
                 boost::optional<std::string> prefix;
         };

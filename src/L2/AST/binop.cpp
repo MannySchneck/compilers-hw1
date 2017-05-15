@@ -78,6 +78,6 @@ Inst_Ptr Binop::replace_vars(std::unordered_map<std::string, std::string> reg_ma
 
 
 
-void ~Binop::accept(Instruction_Visitor &v){
+void Binop::accept(Instruction_Visitor &v){
         v.visit(this);
 }

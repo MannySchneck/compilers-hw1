@@ -33,3 +33,7 @@ io_set_t Return::kill() const{
 Inst_Ptr Return::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
         return Inst_Ptr{new Return{stack_shift}};
 }
+
+void Return::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

@@ -10,6 +10,8 @@
 #include "L2/reg_allocation/interference_graph.h"
 #include <prettyprint.hpp>
 #include <sstream>
+#include <algorithm>
+#include <random>
 
 using namespace L2;
 
@@ -103,7 +105,7 @@ liveness_sets_t Function::make_liveness_sets(){
 
 
 // TODO: filter on reg vs var
-// TODO: XXX FIXME XXX 
+// TODO: XXX FIXME XXX
 Interference_Graph Function::
 make_interference_graph(){
         // This isn't shitty at all.
@@ -191,10 +193,60 @@ compiler_ptr<Function> Function::allocate_registers(){
         return regs_only_new_f;
 }
 
-
-
 std::string Function::find_prefix(){
+        std::vector<std::string> symbols;
 
+        for(auto instr : instructions){
+                Get_Ids_Visitor v{};
+                instr->accept(v);
+                symbols.insert(symbols.end(),
+                               v.result.begin(),
+                               v.result.end());
+        }
+
+        std::sort(symbols.begin(), symbols.end());
+
+        auto z_symbol =
+                std::find_if(symbols.begin(),
+                             symbols.end(),
+                             [](const std::string& s){
+                                     return s[0] == 'z';
+                             });
+
+        if(z_symbol == symbols.end()){
+                return std::string{'z'};
+        }
+        else{
+
+                char next_char = 'a';
+                std::string prefix{'z'};
+                for(; z_symbol != symbols.end(); z_symbol++){
+                        auto symbol = *z_symbol;
+
+                        bool found_prefix{false};
+                        // prefix can't collide with anything previous
+                        // since if collision was possible, it would have
+                        // sorted after the string we're checking
+
+                        // This is so fucking terrible
+                        while(!found_prefix){
+
+                                if(next_char == '{'){
+                                        next_char = 'a';
+                                        prefix.push_back(next_char);
+                                }
+
+                                if(prefix == symbol.substr(0, prefix.length())){
+                                        char prefix_add = symbol[prefix.length() - 1];
+                                        prefix[prefix.length() - 1] = prefix_add;
+                                        next_char = prefix_add + 1;
+                                }
+                                else{
+                                        found_prefix = true;
+                                }
+                        }
+                }
+        }
 }
 
 std::string Function::get_prefix(){
@@ -209,4 +261,17 @@ std::string Function::get_prefix(){
 
 void Function::spill_these(std::vector<compiler_ptr<IG_Node>> spills){
         std::string prefix = get_prefix();
+}
+
+char rando_chardrissian(){
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::uniform_int_distribution<> upcase_ascii(65, 90);
+        const static int to_lowcase = 32;
+
+        const static int odd_mask = 0x1;
+        int uncased_char_ = upcase_ascii(gen);
+        int char_ = upcase_ascii(gen) & 0x1 ? uncased_char_ : uncased_char_ + to_lowcase;
+
+        return static_cast<char>(char_);
 }

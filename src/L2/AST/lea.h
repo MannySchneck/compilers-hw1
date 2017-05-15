@@ -21,13 +21,15 @@ namespace L2 {
 
                 Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
 
-                void accept(Instruction_Visitor v) override;
+                void accept(Instruction_Visitor &v) override;
         private:
                 compiler_ptr<Writable> target;
                 compiler_ptr<Writable> base;
 
                 compiler_ptr<Writable> offset;
                 int64_t mult; // 0 | 2 | 4 | 8
+
+                friend class Get_Ids_Visitor;
         };
 
 

@@ -53,3 +53,7 @@ Inst_Ptr LEA::replace_vars(std::unordered_map<std::string, std::string> reg_map)
         throw std::logic_error("nope, didn't implement LEA");
         return Inst_Ptr{};
 }
+
+void LEA::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

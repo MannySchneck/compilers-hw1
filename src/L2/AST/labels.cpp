@@ -42,3 +42,7 @@ Inst_Ptr L2_Label::replace_vars(std::unordered_map<std::string, std::string> reg
         throw std::logic_error("nope, didn't implement L2_Label");
         return Inst_Ptr{};
 }
+
+void L2_Label::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

@@ -104,3 +104,10 @@ Inst_Ptr Call::replace_vars(std::unordered_map<std::string, std::string> reg_map
         return Inst_Ptr{};
 }
 
+void Call::accept(Instruction_Visitor &v){
+        v.visit(this);
+}
+
+void Runtime_Call::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

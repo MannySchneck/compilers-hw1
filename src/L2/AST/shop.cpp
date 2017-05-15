@@ -43,3 +43,7 @@ Inst_Ptr Shop::replace_vars(std::unordered_map<std::string, std::string> reg_map
         throw std::logic_error("nope, didn't implement Shop");
         return Inst_Ptr{};
 }
+
+void Shop::accept(Instruction_Visitor &v){
+        v.visit(this);
+}

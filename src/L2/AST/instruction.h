@@ -1,9 +1,9 @@
 #pragma once
 
+#include <L2/AST/instruction_visitor.h>
 #include <L2/AST/marker_classes.h>
 #include <unordered_map>
 
-class Instruction_Visitor;
 
 namespace L2{
         using io_set_t = std::set<std::string>;
@@ -39,7 +39,7 @@ namespace L2{
 ///////////////////////////////////////////////////////////////////////////////
 //                                 Do a Visitor...                           //
 ///////////////////////////////////////////////////////////////////////////////
-                virtual void accept(Instruction_Visitor v) = 0;
+                virtual void accept(Instruction_Visitor &v) = 0;
 
         protected:
                 Instruction() = default;
