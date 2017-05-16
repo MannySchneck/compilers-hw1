@@ -106,7 +106,7 @@ Interference_Graph::attempt_coloring(){
                   nodes_to_color_stack.end(),
                   [this](const compiler_ptr<IG_Node>& a,
                          const compiler_ptr<IG_Node>& b){
-                          return adjacency_set.at(a->get_name()).size() <
+                          return adjacency_set.at(a->get_name()).size() >
                                   adjacency_set.at(b->get_name()).size();
                   });
 

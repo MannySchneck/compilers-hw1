@@ -69,7 +69,6 @@ io_set_t Binop::kill() const{
         return kill_st;
 }
 
-
 Inst_Ptr Binop::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
         return Inst_Ptr{new Binop{op,
                                 sub_reg_mapping<Binop_Lhs>(reg_map, lhs),

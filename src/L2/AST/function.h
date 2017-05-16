@@ -35,14 +35,20 @@ namespace L2{
 
                 void populate_liveness_sets();
                 Interference_Graph make_interference_graph();
-                void spill_these(std::vector<compiler_ptr<IG_Node>>);
+
+                std::vector<compiler_ptr<Instruction>>
+                spill_these(std::vector<compiler_ptr<IG_Node>>);
+                void insert_spill_accesses(
+                        std::vector<compiler_ptr<Instruction>>::iterator pos,
+                        const std::string &id_to_spill,
+                        const std::unordered_map<std::string, std::string> &spill_map,
+                        std::vector<compiler_ptr<Instruction>> & new_instrs);
+
                 compiler_ptr<Function> allocate_registers();
 
                 liveness_sets_t make_liveness_sets();
 
                 void dump(std::ostream &out) const override;
-
-
 
                 int64_t stack_args() const;
                 int64_t stack_shift() const;
@@ -52,12 +58,11 @@ namespace L2{
                 L2_Target_Label name;
                 int64_t arguments;
                 int64_t locals;
+
                 std::vector<compiler_ptr<Instruction>> instructions;
 
                 std::string find_prefix();
                 std::string get_prefix();
-
-
         private:
                 static char rando_chardrissian();
                 int prefix_counter;

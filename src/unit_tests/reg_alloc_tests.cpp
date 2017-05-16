@@ -297,10 +297,10 @@ TEST_CASE("interference graph generation"){
                                 REQUIRE(ss.str() ==
                                         "(:t3f\n" \
                                         "0 0\n"   \
-                                        "(rdx <- rdi)\n"  \
-                                        "(rdi <- rsi)\n"  \
-                                        "(rdx += rdi)\n"  \
-                                        "(rax <- rdx)\n"  \
+                                        "(rdi <- rdi)\n"  \
+                                        "(rsi <- rsi)\n"  \
+                                        "(rdi += rsi)\n"  \
+                                        "(rax <- rdi)\n"  \
                                         "(return)"      \
                                         "\n)\n");
                 }
@@ -339,9 +339,29 @@ TEST_CASE("test getting function prefix"){
         }
 }
 
-TEST_CASE("Spilling", "[!hide]"){
+TEST_CASE("Instruction visitor"){
+        SECTION("on a binop"){
+                compiler_ptr<Instruction>
+                        foo_to_ret{new Binop(Binop_Op::store,
+                                             compiler_ptr<Binop_Lhs>{new Writable_Reg("rax")},
+                                             compiler_ptr<Binop_Rhs>{new Writable_Reg("foo")})};
+
+                Get_Ids_Visitor v;
+
+                foo_to_ret->accept(v);
+
+                std::vector<std::string> expected = {"rax", "foo"};
+
+                REQUIRE(v.result == expected);
+        }
+}
+
+
+TEST_CASE("Spilling"){
 
         std::string test_prefix = "/home/manny/322/hw/compiler/src/unit_tests/alloc_test_funs/";
+
+
         SECTION("Allocation on 16 live vars"){
                 Function fun = parse_function_file(test_prefix.append("test4.l2f"));
 
@@ -354,13 +374,27 @@ TEST_CASE("Spilling", "[!hide]"){
                 newF->dump(ss);
 
                 REQUIRE(ss.str() ==
-                        "(:t3f\n" \
-                        "0 0\n"   \
-                        "(rdx <- rdi)\n"  \
-                        "(rdi <- rsi)\n"  \
-                        "(rdx += rdi)\n"  \
-                        "(rax <- rdx)\n"  \
-                        "(return)"      \
-                        "\n)\n");
+                        "(:t4f\n"
+                        "0 0\n"
+                        "(rax += 3)\n"
+                        "(rbx += 3)\n"
+                        "(rbp += 3)\n"
+                        "(r15 += 3)\n"
+                        "(r14 += 3)\n"
+                        "(r13 += 3)\n"
+                        "(r12 += 3)\n"
+                        "(r11 += 3)\n"
+                        "(r10 += 3)\n"
+                        "(rax <- (mem rsp 8))\n"
+                        "(rax += 3)\n"
+                        "((mem rsp 8) <- rax)\n"
+                        "(r9 += 3)\n"
+                        "(r8 += 3)\n"
+                        "(rcx += 3)\n"
+                        "(rdx += 3)\n"
+                        "(rsi += 3)\n"
+                        "(rdi += 3)\n"
+                        "(rax <- rdi)\n"
+                        ")\n");
         }
 }

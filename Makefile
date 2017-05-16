@@ -63,7 +63,7 @@ UNIT_TEST_MAIN_OBJ:= $(UNIT_TEST_MAIN:.cpp=.o)
 
 CXX_FLAGS := --std=c++1z -O0 -I./$(L1_SRC_DIR) -I./src -I./src/L2 -I./lib/PEGTL -I./lib/boost_1_64_0 -g3 -Wno-write-strings
 LD_FLAGS :=
-CXX := g++
+CXX := clang++
 
 CXX_COMPILE := $(CXX) $(CXX_FLAGS) $(LD_FLAGS)
 

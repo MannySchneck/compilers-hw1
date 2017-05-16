@@ -3,6 +3,7 @@
 #include <L2/AST/instruction_visitor.h>
 #include <L2/AST/marker_classes.h>
 #include <unordered_map>
+#include <L2/AST/lang_constants.h>
 
 
 namespace L2{
@@ -34,7 +35,8 @@ namespace L2{
 
                 void insert_name(io_set_t &io_set, const compiler_ptr<AST_Item> &id) const;
 
-                virtual Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const = 0;
+                virtual Inst_Ptr replace_vars(std::unordered_map<std::string,
+                                              std::string> sub_map) const = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                 Do a Visitor...                           //
@@ -46,7 +48,7 @@ namespace L2{
 
                 template<typename T>
                 static compiler_ptr<T> sub_reg_mapping(std::unordered_map<std::string,
-                                                std::string> reg_map,
+                                                std::string> sub_map,
                                                 compiler_ptr<T> id_maybe);
         };
 
@@ -70,32 +72,36 @@ namespace L2{
 namespace L2{
 
         template<typename T>
-        compiler_ptr<T> sub_var(std::unordered_map<std::string, std::string> reg_map,
+        compiler_ptr<T> sub_var(std::unordered_map<std::string, std::string> sub_map,
                                 std::string name){
-                        return compiler_ptr<T>{
-                                new Writable_Reg{(reg_map.at(name))}}; // Writable_Reg == GPRs
+                if(sub_map.count(name)){
+                        if(Lang_Constants::regs_set.count(sub_map.at(name))){
+                                return compiler_ptr<T>{new Writable_Reg{sub_map.at(name)}};
+                        }
+                        return compiler_ptr<T>{new Var{sub_map.at(name)}};
+                }
+
+                return compiler_ptr<T>{new Var{name}};
         }
 
         template<typename T>
         compiler_ptr<T> Instruction::sub_reg_mapping(std::unordered_map<std::string,
-                                                     std::string> reg_map,
+                                                     std::string> sub_map,
                                                      compiler_ptr<T> id_maybe){
 
-                // Badness here. Break var case into fun. Use on mem. (or, fix the design...)
                 Memory_Ref* mem_ptr;
                 if((mem_ptr = dynamic_cast<Memory_Ref*>(id_maybe.get()))){
                         return compiler_ptr<T>{new Memory_Ref{
-                                        sub_var<Reg>(reg_map,
+                                        sub_var<L2_ID>(sub_map,
                                                      mem_ptr->get_base()->get_name()),
                                                 mem_ptr->get_offset()}};
                 }
 
                 Var* var_ptr;
                 if((var_ptr = dynamic_cast<Var*>(id_maybe.get()))){
-                        return sub_var<T>(reg_map, var_ptr->get_name());
+                        return sub_var<T>(sub_map, var_ptr->get_name());
                 }
 
                 return id_maybe;
         }
-
 }

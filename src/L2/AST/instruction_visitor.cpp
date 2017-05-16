@@ -4,7 +4,7 @@
 void Get_Ids_Visitor::maybe_push_id(std::shared_ptr<AST_Item> id_maybe){
 
         L2_ID* id_ptr = nullptr;
-        if(id_ptr = dynamic_cast<L2_ID*>(id_maybe.get())){
+        if((id_ptr = dynamic_cast<L2_ID*>(id_maybe.get()))){
                 result.push_back(id_ptr->get_name());
         }
 }
