@@ -41,8 +41,10 @@ L2_REG_CPP := $(wildcard $(L2_REG_DIR)/*.cpp)
 L2_REG_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_REG_CPP:src/%.cpp=%.o))
 
 L2_CPP_FILES := $(wildcard $(L2_SRC_DIR)/*.cpp)
-L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/*.cpp)
+L2_MAIN_CPP := $(wildcard $(L2_SRC_DIR)/main/compiler.cpp)
+L2_LIVENESS_CPP := $(wildcard $(L2_SRC_DIR)/main/liveness.cpp)
 
+L2_LIVENESS_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_LIVENESS_CPP:src/%.cpp=%.o))
 L2_MAIN_OBJ := $(addprefix $(L2_OBJ_DIR),$(L2_MAIN_CPP:src/%.cpp=%.o))
 L2_OBJ_FILES := $(addprefix $(L2_OBJ_DIR),$(L2_CPP_FILES:src/%.cpp=%.o))
 #tests
@@ -63,7 +65,7 @@ UNIT_TEST_MAIN_OBJ:= $(UNIT_TEST_MAIN:.cpp=.o)
 
 CXX_FLAGS := --std=c++1z -O0 -I./$(L1_SRC_DIR) -I./src -I./src/L2 -I./lib/PEGTL -I./lib/boost_1_64_0 -g3 -Wno-write-strings
 LD_FLAGS :=
-CXX := clang++
+CXX := g++
 
 CXX_COMPILE := $(CXX) $(CXX_FLAGS) $(LD_FLAGS)
 
@@ -103,15 +105,19 @@ L1_test: L1
 ################################################################################
 # L2
 ################################################################################
+L2_Liveness: $(L2_OBJ_FILES) $(L2_LIVENESS_OBJ) $(L2_AST_OBJ) $(L2_REG_OBJ)
+	$(CXX_COMPILE) -o ./bin/$@ $^
+
 L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ) $(L2_REG_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
 
+
 test: L2_test
 
-liveness_test: L2
+liveness_test: L2_Liveness
 	./scripts/test_liveness.sh
 
-L2_test:
+L2_test: L2
 	./scripts/L2_test.sh
 
 ################################################################################
