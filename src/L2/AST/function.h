@@ -26,6 +26,7 @@ namespace L2{
 
 
         class Function : public virtual AST_Item{
+                // This is an awful mess...
         public:
                 Function();
                 Function(L2_Target_Label name, int64_t args, int64_t locals);
@@ -36,8 +37,8 @@ namespace L2{
                 void populate_liveness_sets();
                 Interference_Graph make_interference_graph();
 
-                std::vector<compiler_ptr<Instruction>>
-                spill_these(std::vector<compiler_ptr<IG_Node>>);
+                std::vector<compiler_ptr<Instruction>> spill_these(std::vector<compiler_ptr<IG_Node>>);
+
                 void insert_spill_accesses(
                         std::vector<compiler_ptr<Instruction>>::iterator pos,
                         const std::string &id_to_spill,
@@ -63,6 +64,9 @@ namespace L2{
 
                 std::string find_prefix();
                 std::string get_prefix();
+
+
+                void accept(AST_Item_Visitor &v) override;
         private:
                 static char rando_chardrissian();
                 int prefix_counter;

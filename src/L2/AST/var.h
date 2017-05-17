@@ -6,7 +6,7 @@ namespace L2{
         class Var : public Writable,
                     public L2_ID{
         public:
-                Var(std::string name);
+                explicit Var(std::string name);
 
                 void dump(std::ostream &out) const override;
         private:

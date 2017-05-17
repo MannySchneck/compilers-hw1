@@ -65,3 +65,7 @@ Inst_Ptr Comparison_Store::replace_vars(std::unordered_map<std::string, std::str
 void Comparison_Store::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void Comparison_Store::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

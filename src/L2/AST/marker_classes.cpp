@@ -10,3 +10,7 @@ L2_ID::L2_ID(std::string name) :
 std::string L2_ID::get_name(){
         return name;
 }
+
+void L2_ID::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

@@ -29,6 +29,7 @@ namespace L2 {
 
 
                 void accept(Instruction_Visitor &v) override;
+                void accept(AST_Item_Visitor &v) override;
         private:
                 compiler_ptr<L2_Label> target;
         };

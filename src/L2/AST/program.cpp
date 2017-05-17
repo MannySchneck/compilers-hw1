@@ -16,3 +16,7 @@ L2::Program::Program(std::string label) :
 void L2::Program::dump(std::ostream &out) const{
         out << "prog!";
 }
+
+void L2::Program::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

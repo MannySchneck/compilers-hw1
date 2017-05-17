@@ -26,3 +26,7 @@ void Memory_Ref::dump(std::ostream &out) const{
         out << ")";
 }
 
+
+void Memory_Ref::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

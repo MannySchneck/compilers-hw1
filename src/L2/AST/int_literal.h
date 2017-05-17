@@ -12,5 +12,6 @@ namespace L2{
                 Integer_Literal(std::string);
                 void dump(std::ostream &out) const override;
                 int64_t value;
+                void accept(AST_Item_Visitor &v) override;
         };
 }

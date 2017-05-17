@@ -7,7 +7,7 @@
 #include <parse_stack.h>
 
 namespace L2{
-        Program L2_parse_file (const char *fileName);
+        Program L2_parse_file (std::string filename);
 
         Function parse_function_file (std::string fileName);
 }

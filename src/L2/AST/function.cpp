@@ -378,3 +378,7 @@ char rando_chardrissian(){
 
         return static_cast<char>(char_);
 }
+
+void Function::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

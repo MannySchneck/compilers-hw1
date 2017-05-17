@@ -57,3 +57,7 @@ Inst_Ptr LEA::replace_vars(std::unordered_map<std::string, std::string> reg_map)
 void LEA::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void LEA::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

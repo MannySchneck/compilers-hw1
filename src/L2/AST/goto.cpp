@@ -48,3 +48,7 @@ Inst_Ptr Goto::replace_vars(std::unordered_map<std::string, std::string> reg_map
 void Goto::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void Goto::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

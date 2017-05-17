@@ -37,3 +37,7 @@ Inst_Ptr Return::replace_vars(std::unordered_map<std::string, std::string> reg_m
 void Return::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void Return::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

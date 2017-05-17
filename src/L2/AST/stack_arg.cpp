@@ -10,3 +10,7 @@ void Stack_Arg::dump(std::ostream &out) const{
         out << offset;
         out << ")";
 }
+
+void Stack_Arg::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

@@ -45,3 +45,7 @@ Inst_Ptr Monop::replace_vars(std::unordered_map<std::string, std::string> reg_ma
 void Monop::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void Monop::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

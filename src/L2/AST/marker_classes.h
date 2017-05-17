@@ -69,5 +69,6 @@ namespace L2{
                 explicit L2_ID(std::string name);
                 std::string get_name();
                 std::string name;
+                void accept(AST_Item_Visitor &v) override;
         };
 }

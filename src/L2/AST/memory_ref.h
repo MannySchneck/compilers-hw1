@@ -15,6 +15,7 @@ namespace L2{
                 compiler_ptr<L2_ID> get_base();
 
                 int64_t get_offset(){return offset;}
+                void accept(AST_Item_Visitor &v) override;
 
         private:
                 compiler_ptr<L2_ID> base;

@@ -111,3 +111,12 @@ void Call::accept(Instruction_Visitor &v){
 void Runtime_Call::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void Runtime_Call::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}
+
+void Call::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}
+

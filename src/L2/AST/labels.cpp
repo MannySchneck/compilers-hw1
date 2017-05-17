@@ -46,3 +46,7 @@ Inst_Ptr L2_Label::replace_vars(std::unordered_map<std::string, std::string> reg
 void L2_Label::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void L2_Label::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

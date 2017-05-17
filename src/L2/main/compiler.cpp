@@ -1,5 +1,6 @@
 #include <L2/AST/L2.h>
 #include <L2/L2_parser.h>
+#include <fstream>
 
 int main(int argc, char* argv[]){
 
@@ -11,7 +12,9 @@ int main(int argc, char* argv[]){
 
         L2::Program p(L2::L2_parse_file(std::string(argv[1])));
 
-        fstream outfile("prog.L1", ios_base::out);
+        std::fstream outfile("prog.L1", outfile.out);
 
-        p.translate(outfile);
+        Translate_Visitor v(outfile);
+
+        p.accept(v);
 }

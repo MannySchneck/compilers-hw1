@@ -10,6 +10,7 @@ namespace L2{
                 Stack_Arg(int64_t offset);
 
                 void dump(std::ostream &out) const override;
+                void accept(AST_Item_Visitor &v) override;
         private:
                 int64_t offset;
         };

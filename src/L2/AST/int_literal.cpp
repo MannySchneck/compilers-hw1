@@ -9,3 +9,7 @@ Integer_Literal::Integer_Literal(std::string val){
 void Integer_Literal::dump(std::ostream &out) const{
         out << value;
 }
+
+void Integer_Literal::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}

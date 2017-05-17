@@ -25,6 +25,7 @@ namespace L2{
                 Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const override;
 
                 void accept(Instruction_Visitor &v) override;
+                void accept(AST_Item_Visitor &v) override;
         private:
                 void output_comparison_store(Translatable* lhs,
                                              Translatable* rhs,

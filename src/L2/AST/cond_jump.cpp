@@ -75,3 +75,7 @@ Inst_Ptr Cond_Jump::replace_vars(std::unordered_map<std::string, std::string> re
 void Cond_Jump::accept(Instruction_Visitor &v){
         v.visit(this);
 }
+
+void Cond_Jump::accept(AST_Item_Visitor &v){
+        v.visit(this);
+}
