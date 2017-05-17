@@ -41,8 +41,7 @@ std::vector<Inst_Posn> Goto::find_successors(Inst_Posn pos,
 // no computed goto
 
 Inst_Ptr Goto::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Goto");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Goto{target}};
 }
 
 void Goto::accept(Instruction_Visitor &v){

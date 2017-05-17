@@ -15,8 +15,11 @@ namespace L2{
 
                 ~Program() override = default;
 
+                void allocate_registers();
+
                 void dump(std::ostream &out) const override;
                 void accept(AST_Item_Visitor &v) override;
+
 
                 L2_Label entryPointLabel;
                 std::vector<compiler_ptr<Function>> functions;

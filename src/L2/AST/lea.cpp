@@ -13,8 +13,8 @@ LEA::LEA(compiler_ptr<Writable> target,
         offset(offset),
         mult(mult)
 {
-        if((mult % 2) || mult > 8){
-                throw std::invalid_argument("mult must be even, and 8 or less");
+        if(mult == 1 || (mult % 2) || mult > 8){
+                throw std::invalid_argument("1, OR: mult must be even, and 8 or less");
         }
 }
 
@@ -50,8 +50,11 @@ io_set_t LEA::kill() const{
 }
 
 Inst_Ptr LEA::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement LEA");
-        return Inst_Ptr{};
+        return Inst_Ptr{new LEA{sub_reg_mapping<Writable>(reg_map, target),
+                                sub_reg_mapping<Writable>(reg_map, base),
+                                sub_reg_mapping<Writable>(reg_map, offset),
+                                mult}};
+
 }
 
 void LEA::accept(Instruction_Visitor &v){

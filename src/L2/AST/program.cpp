@@ -13,6 +13,13 @@ const std::array<char*, 6> L2::Program::callee_saves = {"rbx",
 L2::Program::Program(std::string label) :
         entryPointLabel(label){}
 
+
+void L2::Program::allocate_registers(){
+        for(auto f : functions){
+                f->allocate_registers();
+        }
+}
+
 void L2::Program::dump(std::ostream &out) const{
         out << "prog!";
 }

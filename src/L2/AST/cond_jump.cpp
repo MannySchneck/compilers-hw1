@@ -68,8 +68,11 @@ std::vector<Inst_Posn> Cond_Jump::find_successors(Inst_Posn pos, std::vector<Ins
 }
 
 Inst_Ptr Cond_Jump::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Cond_Jump");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Cond_Jump{cmp,
+                                sub_reg_mapping<Value_Source>(reg_map, cmp_lhs),
+                                sub_reg_mapping<Value_Source>(reg_map, cmp_rhs),
+                                true_target,
+                                false_target}};
 }
 
 void Cond_Jump::accept(Instruction_Visitor &v){

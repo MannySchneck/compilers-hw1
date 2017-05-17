@@ -14,7 +14,8 @@ int main(int argc, char* argv[]){
 
         std::fstream outfile("prog.L1", outfile.out);
 
-        Translate_Visitor v(outfile);
+        p.allocate_registers();
 
+        Translate_Visitor v(outfile);
         p.accept(v);
 }

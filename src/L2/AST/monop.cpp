@@ -38,7 +38,9 @@ io_set_t Monop::kill() const{
 }
 
 Inst_Ptr Monop::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Monop");
+        return Inst_Ptr{new Monop{op,
+                                sub_reg_mapping<Writable>(reg_map, target)}};
+
         return Inst_Ptr{};
 }
 

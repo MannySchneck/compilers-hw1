@@ -40,8 +40,10 @@ io_set_t Shop::kill() const{
 }
 
 Inst_Ptr Shop::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Shop");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Shop{op,
+                                sub_reg_mapping<Writable>(reg_map, lhs),
+                                sub_reg_mapping<Value_Source>(reg_map, rhs)}};
+
 }
 
 void Shop::accept(Instruction_Visitor &v){

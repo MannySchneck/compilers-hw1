@@ -44,6 +44,9 @@ namespace L2 {
                 L2_Target_Label();
                 L2_Target_Label(std::string label);
 
+
+                Inst_Ptr replace_vars(std::unordered_map<std::string, std::string> reg_map) const;
+
                 void dump(std::ostream &out) const override;
         };
 

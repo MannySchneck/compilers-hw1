@@ -105,4 +105,41 @@ namespace L2{
 
                 return id_maybe;
         }
+
+        template<>
+        inline compiler_ptr<Callable> Instruction::sub_reg_mapping(std::unordered_map<std::string,
+                                     std::string> sub_map,
+                                     compiler_ptr<Callable> id_maybe){
+                Var* var_ptr;
+                if((var_ptr = dynamic_cast<Var*>(id_maybe.get()))){
+                        return sub_var<Callable>(sub_map, var_ptr->get_name());
+                }
+
+                return id_maybe;
+        }
+
+        template<>
+        inline compiler_ptr<Writable> Instruction::sub_reg_mapping(std::unordered_map<std::string,
+                                                                   std::string> sub_map,
+                                                                   compiler_ptr<Writable> id_maybe){
+                Var* var_ptr;
+                if((var_ptr = dynamic_cast<Var*>(id_maybe.get()))){
+                        return sub_var<Writable>(sub_map, var_ptr->get_name());
+                }
+
+                return id_maybe;
+        }
+
+        template<>
+        inline compiler_ptr<Value_Source> Instruction::sub_reg_mapping(std::unordered_map<std::string,
+                                                                   std::string> sub_map,
+                                                                   compiler_ptr<Value_Source> id_maybe){
+                Var* var_ptr;
+                if((var_ptr = dynamic_cast<Var*>(id_maybe.get()))){
+                        return sub_var<Value_Source>(sub_map, var_ptr->get_name());
+                }
+
+                return id_maybe;
+        }
+
 }

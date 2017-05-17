@@ -38,9 +38,13 @@ io_set_t L2_Label::kill() const{
         return kill_st;
 }
 
+Inst_Ptr L2_Target_Label::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
+        return Inst_Ptr{new L2_Target_Label{labelName}};
+}
+
+
 Inst_Ptr L2_Label::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement L2_Label");
-        return Inst_Ptr{};
+        return Inst_Ptr{new L2_Label{labelName}};
 }
 
 void L2_Label::accept(Instruction_Visitor &v){

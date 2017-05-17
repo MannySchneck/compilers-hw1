@@ -2,6 +2,7 @@
 #include <L2/AST/labels.h>
 #include <L2/AST/lang_constants.h>
 #include <iostream>
+#include <algorithm>
 
 using namespace L2;
 
@@ -55,7 +56,10 @@ io_set_t Call::gen() const{
                 gen_st.insert(p->name);
         }
 
-        for(int i = 0; i < numargs; i++){
+        for(int i = 0;
+            i < std::min(numargs,
+                         static_cast<int64_t>(Lang_Constants::arg_regs.size()));
+            i++){
                 gen_st.insert(Lang_Constants::arg_regs[i]);
         }
 
@@ -95,13 +99,11 @@ io_set_t Runtime_Call::kill() const{
 }
 
 Inst_Ptr Runtime_Call::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Runtime_Call");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Runtime_Call{fun, numargs}};
 }
 
 Inst_Ptr Call::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Call");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Call{sub_reg_mapping<Callable>(reg_map, fun), numargs}};
 }
 
 void Call::accept(Instruction_Visitor &v){

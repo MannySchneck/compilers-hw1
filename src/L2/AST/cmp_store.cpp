@@ -58,8 +58,10 @@ io_set_t Comparison_Store::kill() const{
 }
 
 Inst_Ptr Comparison_Store::replace_vars(std::unordered_map<std::string, std::string> reg_map) const{
-        throw std::logic_error("nope, didn't implement Comparison_Store");
-        return Inst_Ptr{};
+        return Inst_Ptr{new Comparison_Store{op,
+                                sub_reg_mapping<Value_Source>(reg_map, lhs),
+                                sub_reg_mapping<Value_Source>(reg_map, rhs),
+                                sub_reg_mapping<Writable>(reg_map, target)}};
 }
 
 void Comparison_Store::accept(Instruction_Visitor &v){
