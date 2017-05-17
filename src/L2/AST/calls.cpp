@@ -63,6 +63,7 @@ io_set_t Call::gen() const{
                 gen_st.insert(Lang_Constants::arg_regs[i]);
         }
 
+
         return gen_st;
 }
 
@@ -81,9 +82,13 @@ io_set_t Call::kill() const{
 io_set_t Runtime_Call::gen() const{
         io_set_t gen_st;
 
-        for(int i = 0; i < numargs; i++){
+        for(int i = 0;
+            i < std::min(numargs,
+                         static_cast<int64_t>(Lang_Constants::arg_regs.size()));
+            i++){
                  gen_st.insert(Lang_Constants::arg_regs[i]);
         }
+
 
         return gen_st;
 }

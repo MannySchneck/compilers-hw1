@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo My working directory is $(pwd)
 ./bin/L1 $@
 if ! test -f prog.S ; then
   exit ;

@@ -284,7 +284,8 @@ namespace L2 {
                 seps,
                 pegtl::sor<
                         rcx,
-                        immediate
+                        immediate,
+                        L2_var
                         >
                 >{};
 
@@ -791,7 +792,7 @@ namespace L2 {
         template<> struct action <L2_mem_ref> {
                 static void apply( const pegtl::input & in, L2::Program & p){
                         auto off = the_stack.downcast_pop<Integer_Literal>();
-                        auto base = the_stack.downcast_pop<Reg>();
+                        auto base = the_stack.downcast_pop<L2_ID>();
                         the_stack.push(ASTPtr(new Memory_Ref(std::move(base), off->value)));
                 }
         };

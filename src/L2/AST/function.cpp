@@ -8,10 +8,14 @@
 #include <numeric>
 #include <iostream>
 #include "L2/reg_allocation/interference_graph.h"
-#include <prettyprint.hpp>
 #include <sstream>
 #include <algorithm>
 #include <random>
+
+#include <prettyprint.hpp>
+
+#include  <cstdlib>
+
 #include <memory>
 
 #include <cassert>
@@ -127,11 +131,27 @@ make_interference_graph(){
                 // out set
                 // connect the kill set to the out set (unless doing a store)
                 auto p = dynamic_cast<Binop*>(inst.get());
-                if(p && p->op != Binop_Op::store){ // =(
+                bool not_binop_store = !(p && p->op == Binop_Op::store);
+
+                // std::cout << "for instr funk\n";
+                // inst->dump(std::cout);
+                // std::cout << " " << "is binop : " << "not_binop_store: " << not_binop_store;
+                // std::cout << "\n";
+
+
+                if(not_binop_store){ // =(
+                        // std ::cout << "deadbeef\n";
+                        // std::cout << "On instr" << "\n";
+                        // inst->dump(std::cout);
+                        // std::cout << "\n";
+                        // std::cout << "With kill set\n";
+                        // std::cout << inst->kill();
                         for(auto id : inst->kill()){
                                 for(auto id_prime : inst->out){
-                                        if(id != id_prime &&
-                                           !Lang_Constants::regs_set.count(id)){
+                                        if(id != id_prime){
+                                                // std::cout << " REALLY connecting "
+                                                //           << id << " and "
+                                                //           << id_prime << std::endl;
                                                 interference_graph.add_edge(id, id_prime);
                                         }
                                 }
@@ -154,6 +174,14 @@ make_interference_graph(){
                 }
         }
 
+        // std::cout << "interference graph for function:\n";
+        // std::cout << "_____________________________________\n";
+        // dump(std::cout);
+        // std::cout << "\n";
+        // std::cout << "_____________________________________\n";
+        // std::cout << interference_graph;
+        // std::cout << "\n\n";
+
         return interference_graph;
 }
 
@@ -166,14 +194,16 @@ void Function::insert_spill_accesses(i_ptr_vec::iterator pos,
 
         assert(pos != instructions.end());
 
-        //XXX probably a bug here...
-        locals += 1;
-        int64_t offset = locals * 8;
+        if(!spill_offset_table.count(id_to_spill)){
+                int64_t offset = locals * 8;
+                spill_offset_table[id_to_spill] = offset;
+                locals += 1;
+        }
 
         compiler_ptr<AST_Item> spill_var{new Var{spill_map.at(id_to_spill)}};
         compiler_ptr<AST_Item> spill_mem_ref{new Memory_Ref{
                         compiler_ptr<L2_ID>{new Reg{"rsp"}},
-                                offset}};
+                                spill_offset_table[id_to_spill]}};
 
         // This is terrible
         auto spill_var_read = std::dynamic_pointer_cast<Binop_Lhs>(spill_var);
@@ -248,7 +278,6 @@ Function::spill_these(std::vector<compiler_ptr<IG_Node>> spills){
 
 compiler_ptr<Function> Function::allocate_registers(){
 
-        populate_liveness_sets();
 
         bool allocated{false};
 
@@ -266,7 +295,9 @@ compiler_ptr<Function> Function::allocate_registers(){
                         instructions = spill_these(spills);
                 }
 
+
         } while(!allocated);
+
 
 
         Get_Ids_Visitor v;
@@ -274,17 +305,31 @@ compiler_ptr<Function> Function::allocate_registers(){
                 inst->accept(v);
         }
 
-        for(auto id : v.result){
-                if(id != "rsp"){
-                        assert((interference_graph.nodes_set.count(id) &&
-                                interference_graph.nodes_set.at(id)->color));
-                }
-        }
 
         auto regs_only_new_f  = std::make_shared<Function>();
         regs_only_new_f->name = name;
+        regs_only_new_f->arguments = arguments;
+        regs_only_new_f->locals = locals;
 
         for(auto instr : instructions){
+
+                // DCE...
+                bool dead{false};
+                Binop* b_ptr = nullptr;
+                if(b_ptr= dynamic_cast<Binop*>(instr.get())){
+                        if(!dynamic_cast<Memory_Ref*>(b_ptr->lhs.get())){
+
+                                bool none_live{true};
+                                for(auto id : instr->kill()){
+                                        none_live &= !instr->out.count(id);
+                                }
+
+                                dead = none_live && instr->kill().size();
+                        }
+                }
+
+                if(dead) continue;
+
                 auto new_instr =  instr->
                         replace_vars(interference_graph.
                                      get_reg_map());

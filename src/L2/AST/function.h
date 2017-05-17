@@ -69,6 +69,8 @@ namespace L2{
                 int64_t arguments;
                 int64_t locals;
 
+                std::unordered_map<std::string, int64_t> spill_offset_table;
+
                 std::vector<compiler_ptr<Instruction>> instructions;
 
 

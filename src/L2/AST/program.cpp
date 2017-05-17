@@ -1,8 +1,11 @@
 #include <L2/AST/program.h>
+#include <iostream>
 
-const char*  L2::Program:: prog_prefix = ".text\n.globl go\n\n";
+using namespace L2;
 
-const std::array<char*, 6> L2::Program::callee_saves = {"rbx",
+const char*  Program:: prog_prefix = ".text\n.globl go\n\n";
+
+const std::array<char*, 6> Program::callee_saves = {"rbx",
                                                         "rbp",
                                                         "r12",
                                                         "r13",
@@ -10,20 +13,24 @@ const std::array<char*, 6> L2::Program::callee_saves = {"rbx",
                                                         "r15"};
 
 
-L2::Program::Program(std::string label) :
+Program::Program(std::string label) :
         entryPointLabel(label){}
 
 
-void L2::Program::allocate_registers(){
+void Program::allocate_registers(){
+        std::vector<compiler_ptr<Function>> new_fancy_funs;
+
         for(auto f : functions){
-                f->allocate_registers();
+                new_fancy_funs.push_back(f->allocate_registers());
         }
+
+        functions = new_fancy_funs;
 }
 
-void L2::Program::dump(std::ostream &out) const{
+void Program::dump(std::ostream &out) const{
         out << "prog!";
 }
 
-void L2::Program::accept(AST_Item_Visitor &v){
+void Program::accept(AST_Item_Visitor &v){
         v.visit(this);
 }

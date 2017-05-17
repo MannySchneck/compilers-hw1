@@ -1,7 +1,7 @@
 (:go
+
   (:go
     0 0
-
     ; Compute the data
     (v1 <- +5)
     (v2 <- -3)
@@ -9,7 +9,6 @@
     (v3++)
     (v3 += v2)
 
-    ; Print
     (rdi <- v3)
     (call print 1)
 

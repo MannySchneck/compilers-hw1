@@ -6,6 +6,7 @@
     (rdi <- 5)
     (rsi <- 5)
     (call allocate 2)
+
     (array1 <- rax)
 
     ; Print the array
