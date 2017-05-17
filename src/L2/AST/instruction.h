@@ -42,6 +42,7 @@ namespace L2{
 //                                 Do a Visitor...                           //
 ///////////////////////////////////////////////////////////////////////////////
                 virtual void accept(Instruction_Visitor &v) = 0;
+                virtual void accept(AST_Item_Visitor &v) = 0;
 
         protected:
                 Instruction() = default;

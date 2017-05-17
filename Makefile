@@ -112,7 +112,7 @@ L2: $(L2_OBJ_FILES) $(L2_MAIN_OBJ) $(L2_AST_OBJ) $(L2_REG_OBJ)
 	$(CXX_COMPILE) -o ./bin/$@ $^
 
 
-test: L2_test
+test: L1 L2_test
 
 liveness_test: L2_Liveness
 	./scripts/test_liveness.sh

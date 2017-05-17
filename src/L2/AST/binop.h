@@ -21,6 +21,8 @@ namespace L2 {
         public:
                 Binop(Binop_Op op, compiler_ptr<Binop_Lhs> lhs, compiler_ptr<Binop_Rhs> rhs);
 
+
+                std::string stringify_binop_op(Binop_Op op) const;
                 void dump(std::ostream &out) const override;
 
                io_set_t gen() const override;

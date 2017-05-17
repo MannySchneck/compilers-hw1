@@ -32,27 +32,36 @@ namespace L2{
                 Function(L2_Target_Label name, int64_t args, int64_t locals);
                 Function(Function&& rhs) = default;
 
+                //// Needs to be here because it needs access to instruction context
                 std::vector<Inst_Posn> find_successors(Inst_Posn);
 
+                //// Register Allocation
                 void populate_liveness_sets();
                 Interference_Graph make_interference_graph();
+                compiler_ptr<Function> allocate_registers();
 
+
+                //// Spill utilities
+                std::string find_prefix();
+                std::string get_prefix();
                 std::vector<compiler_ptr<Instruction>> spill_these(std::vector<compiler_ptr<IG_Node>>);
-
                 void insert_spill_accesses(
                         std::vector<compiler_ptr<Instruction>>::iterator pos,
                         const std::string &id_to_spill,
                         const std::unordered_map<std::string, std::string> &spill_map,
                         std::vector<compiler_ptr<Instruction>> & new_instrs);
 
-                compiler_ptr<Function> allocate_registers();
-
+                //// Translation utilities
                 liveness_sets_t make_liveness_sets();
-
                 void dump(std::ostream &out) const override;
 
+
+                void accept(AST_Item_Visitor &v) override;
+
+                //// Data
                 int64_t stack_args() const;
                 int64_t stack_shift() const;
+
                 void expand_stack(std::ostream&out) const;
                 void shrink_stack(std::ostream&out) const;
 
@@ -62,11 +71,7 @@ namespace L2{
 
                 std::vector<compiler_ptr<Instruction>> instructions;
 
-                std::string find_prefix();
-                std::string get_prefix();
 
-
-                void accept(AST_Item_Visitor &v) override;
         private:
                 static char rando_chardrissian();
                 int prefix_counter;

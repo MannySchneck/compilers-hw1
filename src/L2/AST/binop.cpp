@@ -12,27 +12,34 @@ Binop::Binop(Binop_Op op, compiler_ptr<Binop_Lhs> lhs, compiler_ptr<Binop_Rhs> r
         op(op),
         rhs(std::move(rhs)) {}
 
+std::string Binop::stringify_binop_op(Binop_Op op) const{
+
+        switch(op){
+        case(Binop_Op::store):
+                return "<-";
+                break;
+        case(Binop_Op::add_Assign):
+                return "+=";
+                break;
+        case(Binop_Op::sub_Assign):
+                return "-=";
+                break;
+        case(Binop_Op::mult_Assign):
+                return "*=";
+                break;
+        case(Binop_Op::bit_And_Assign):
+                return "&=";
+                break;
+        default:
+                throw std::logic_error("Invalid binop op");
+        }
+}
+
 void Binop::dump(std::ostream &out) const{
         out << "(";
         lhs->dump(out);
 
-        switch(op){
-        case(Binop_Op::store):
-                out << " <- ";
-                break;
-        case(Binop_Op::add_Assign):
-                out << " += ";
-                break;
-        case(Binop_Op::sub_Assign):
-                out << " -= ";
-                break;
-        case(Binop_Op::mult_Assign):
-                out << " *= ";
-                break;
-        case(Binop_Op::bit_And_Assign):
-                out << " &= ";
-                break;
-        }
+        out << " " << stringify_binop_op(op);
 
         rhs->dump(out);
         out << ")";

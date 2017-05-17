@@ -74,7 +74,8 @@ namespace L2{
                 public AST_Item_Visitor{
         public:
                 explicit Translate_Visitor(std::ostream &out) :
-                        out(out){}
+                        out(out),
+                        locals(-1){}
 
                 void visit(Binop* instr);
                 void visit(Call* instr);
@@ -100,5 +101,6 @@ namespace L2{
 
         private:
                 std::ostream& out;
+                int64_t locals;
         };
 } // L2

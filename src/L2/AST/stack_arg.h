@@ -11,7 +11,7 @@ namespace L2{
 
                 void dump(std::ostream &out) const override;
                 void accept(AST_Item_Visitor &v) override;
-        private:
+
                 int64_t offset;
         };
 }

@@ -7,75 +7,107 @@ using namespace L2;
 //                                Instructions                               //
 ///////////////////////////////////////////////////////////////////////////////
 void Translate_Visitor::visit(Binop* item){
-        out << "didn't implement Binop... SAD!\n";
+        out << "(";
+        item->lhs->accept(*this);
+        out << " ";
+        out << item->stringify_binop_op(item->op);
+        out << " ";
+        item->rhs->accept(*this);
+        out << ")";
 }
 
 void Translate_Visitor::visit(Call* item){
-        out << "didn't implement Call... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Runtime_Call* item){
-        out << "didn't implement Runtime_Call... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Comparison_Store* item){
-        out << "didn't implement Comparison_Store... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Cond_Jump* item){
-        out << "didn't implement Cond_Jump... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Goto* item){
-        out << "didn't implement Goto... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(L2_Label* item){
-        out << "didn't implement L2_Label... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(LEA* item){
-        out << "didn't implement LEA... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Monop* item){
-        out << "didn't implement Monop... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Shop* item){
-        out << "didn't implement Shop... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Return* item){
-        out << "didn't implement Return... SAD!\n";
+        item->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                 structures                                //
 ///////////////////////////////////////////////////////////////////////////////
 void Translate_Visitor::visit(Function* item){
-        out << "didn't implement Function... SAD!\n";
+        this->locals = item->locals;
+        out << "\t(";
+        item->name.dump(out);
+        out << "\n";
+        out << "\t\t" << item->arguments << " " << item->locals << "\n";
+        for(auto i : item->instructions){
+                out << "\t\t";
+                i->accept(*this);
+                out << "\n";
+        }
+
+        out << "\t)";
 }
 
 void Translate_Visitor::visit(Program* item){
-        out << "didn't implement Program... SAD!\n";
+        out << "(";
+        item->entryPointLabel.dump(out);
+        out << "\n\n";
+
+        for(auto f : item->functions){
+                f->accept(*this);
+                out << "\n\n";
+        }
+        out << ")";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                   atoms                                   //
 ///////////////////////////////////////////////////////////////////////////////
 void Translate_Visitor::visit(L2_ID* item){
-        out << "didn't implement L2_ID... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Integer_Literal* item){
-        out << "didn't implement Integer_Literal... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Memory_Ref* item){
-        out << "didn't implement Memory_Ref... SAD!\n";
+        item->dump(out);
 }
 
 void Translate_Visitor::visit(Stack_Arg* item){
-        out << "didn't implement Stack_Arg... SAD!\n";
+        // This is lazy and bad
+        out << "(";
+        out << "mem";
+        out << " ";
+        out << "rsp";
+        out << " ";
+        out << locals * 8 + item->offset;
+        out << ")";
 }
