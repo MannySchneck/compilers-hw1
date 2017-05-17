@@ -5,8 +5,4 @@ if ! test -f prog.L1 ; then
   exit ;
 fi
 
-pushd ./ ;
-cd ../L1 ;
-./L1c ../L2/prog.L1 ;
-mv a.out ../L2 ;
-popd ;
+./L1/L1c ./prog.L1 ;

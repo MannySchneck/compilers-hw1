@@ -2,7 +2,7 @@
 
 passed=0 ;
 failed=0 ;
-cd tests ; 
+cd tests/L2 ; 
 for i in *.L2 ; do
 
   # If the output already exists, skip the current test
@@ -13,10 +13,10 @@ for i in *.L2 ; do
 
   # Generate the binary
   pushd ./ ;
-  cd ../ ;
-  ./L2c tests/${i} ;
-  ./a.out &> tests/${i}.out.tmp ;
-  cmp tests/${i}.out.tmp tests/${i}.out ;
+  cd ../.. ;
+  ./L2/L2c tests/L2/${i} ;
+  ./a.out &> tests/L2/${i}.out.tmp ;
+  cmp tests/L2/${i}.out.tmp tests/L2/${i}.out ;
   if ! test $? -eq 0 ; then
     echo "  Failed" ;
     let failed=$failed+1 ;
